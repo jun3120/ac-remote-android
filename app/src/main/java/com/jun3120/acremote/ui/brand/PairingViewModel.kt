@@ -218,7 +218,11 @@ class PairingViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        irDecode.closeBinary()
+        // 注意：配对成功后不关闭码库，由下一个 Activity 接管
+        // 只在配对失败/取消时关闭
+        if (_state.value != State.SUCCESS) {
+            irDecode.closeBinary()
+        }
     }
 
     enum class State {
