@@ -5,11 +5,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
 import com.jun3120.acremote.R
 import net.irext.webapi.model.Brand
 import net.irext.webapi.model.Category
@@ -23,6 +24,21 @@ class BrandPickerActivity : AppCompatActivity() {
     private lateinit var progressBar: ProgressBar
 
     private var step = STEP_CATEGORY
+
+    private val pairingLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK && result.data != null) {
+            // 配对成功，将结果传回上一层
+            setResult(RESULT_OK, result.data)
+            finish()
+        } else {
+            // 配对取消或失败，回到品牌选择
+            step = STEP_BRAND
+            titleText.text = "选择品牌"
+            viewModel.selectedCategory?.let { viewModel.loadBrands(it.id) }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,9 +59,8 @@ class BrandPickerActivity : AppCompatActivity() {
     private fun setupObservers() {
         viewModel.categories.observe(this) { showCategories(it) }
         viewModel.brands.observe(this) { showBrands(it) }
-        viewModel.remoteIndexes.observe(this) { showIndexes(it) }
+        viewModel.remoteIndexes.observe(this) { onIndexesLoaded(it) }
         viewModel.loading.observe(this) { progressBar.visibility = if (it) View.VISIBLE else View.GONE }
-        viewModel.downloadComplete.observe(this) { onDownloadComplete(it) }
     }
 
     private fun stepCategory() {
@@ -69,8 +84,9 @@ class BrandPickerActivity : AppCompatActivity() {
         if (step != STEP_BRAND) return
         val adapter = SimpleListAdapter(brands.map { it to (it.name ?: "未知") }) { brand ->
             viewModel.selectedBrand = brand as Brand
-            step = STEP_INDEX
-            titleText.text = "选择遥控器型号"
+            // 选择品牌后，加载该品牌的型号列表，进入配对流程
+            step = STEP_PAIRING
+            titleText.text = "准备配对..."
             viewModel.selectedCategory?.let {
                 viewModel.loadRemoteIndexes(it.id, brand.id)
             }
@@ -78,34 +94,30 @@ class BrandPickerActivity : AppCompatActivity() {
         recyclerView.adapter = adapter
     }
 
-    private fun showIndexes(indexes: List<RemoteIndex>) {
-        if (step != STEP_INDEX) return
-        val adapter = SimpleListAdapter(indexes.map {
-            it to (it.remote ?: it.remoteMap ?: "型号 ${it.id}")
-        }) { index ->
-            viewModel.downloadBinFile(index as RemoteIndex)
+    private fun onIndexesLoaded(indexes: List<RemoteIndex>) {
+        if (step != STEP_PAIRING) return
+        if (indexes.isEmpty()) {
+            titleText.text = "该品牌暂无可用型号，请返回"
+            return
         }
-        recyclerView.adapter = adapter
-    }
 
-    private fun onDownloadComplete(index: RemoteIndex?) {
-        if (index == null) return
-        Toast.makeText(this, "遥控器码库已下载: ${index.remote}", Toast.LENGTH_SHORT).show()
-        // 通过 intent 返回码库路径和元信息
-        val data = Intent().apply {
-            putExtra(EXTRA_CODE_PATH, viewModel.binFilePath)
-            putExtra(EXTRA_CATEGORY_ID, viewModel.selectedCategory?.id ?: 1)
-            putExtra(EXTRA_SUB_CATEGORY, viewModel.selectedSubCategory)
-            putExtra(EXTRA_BRAND_NAME, viewModel.selectedBrand?.name ?: "未知")
+        // 品牌下有型号，直接进入配对流程
+        val categoryId = viewModel.selectedCategory?.id ?: 1
+        val brandName = viewModel.selectedBrand?.name ?: "未知"
+        val indexesJson = Gson().toJson(indexes)
+
+        val intent = Intent(this, PairingActivity::class.java).apply {
+            putExtra(PairingActivity.EXTRA_CATEGORY_ID, categoryId)
+            putExtra(PairingActivity.EXTRA_BRAND_NAME, brandName)
+            putExtra(PairingActivity.EXTRA_INDEXES, indexesJson)
         }
-        setResult(RESULT_OK, data)
-        finish()
+        pairingLauncher.launch(intent)
     }
 
     override fun onBackPressed() {
         when (step) {
             STEP_BRAND -> stepCategory()
-            STEP_INDEX -> {
+            STEP_PAIRING -> {
                 step = STEP_BRAND
                 titleText.text = "选择品牌"
                 viewModel.selectedCategory?.let { viewModel.loadBrands(it.id) }
@@ -117,7 +129,7 @@ class BrandPickerActivity : AppCompatActivity() {
     companion object {
         private const val STEP_CATEGORY = 1
         private const val STEP_BRAND = 2
-        private const val STEP_INDEX = 3
+        private const val STEP_PAIRING = 3
 
         const val EXTRA_CODE_PATH = "code_path"
         const val EXTRA_CATEGORY_ID = "category_id"
