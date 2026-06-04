@@ -36,9 +36,19 @@ android {
 }
 
 dependencies {
+    // IRext IR decode library
+    implementation(project(":decodesdk"))
+    implementation("net.irext.webapi:irext-androidapi:1.5.2")
+
+    // AndroidX
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.2")
+    implementation("androidx.fragment:fragment-ktx:1.8.0")
+
+    // Gson
+    implementation("com.google.code.gson:gson:2.11.0")
 }

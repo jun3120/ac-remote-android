@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ACRemote"
 include(":app")
+include(":decodesdk")
