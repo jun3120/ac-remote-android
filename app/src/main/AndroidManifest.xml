@@ -26,6 +26,10 @@
             android:name=".ui.brand.BrandPickerActivity"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".ui.remote.RemoteControlActivity"
+            android:screenOrientation="portrait" />
+
         <meta-data
             android:name="irext_app_key"
             android:value="bb00f5882b850f455e489a54a129fbb0" />

@@ -1,5 +1,6 @@
 package com.jun3120.acremote.ui.brand
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
@@ -90,8 +91,13 @@ class BrandPickerActivity : AppCompatActivity() {
     private fun onDownloadComplete(index: RemoteIndex?) {
         if (index == null) return
         Toast.makeText(this, "遥控器码库已下载: ${index.remote}", Toast.LENGTH_SHORT).show()
-        // 返回结果并关闭
-        setResult(RESULT_OK)
+        // 通过 intent 返回码库路径和元信息
+        val data = Intent().apply {
+            putExtra(EXTRA_CODE_PATH, viewModel.binFilePath)
+            putExtra(EXTRA_CATEGORY_ID, viewModel.selectedCategory?.id ?: 1)
+            putExtra(EXTRA_BRAND_NAME, viewModel.selectedBrand?.name ?: "未知")
+        }
+        setResult(RESULT_OK, data)
         finish()
     }
 
@@ -111,5 +117,9 @@ class BrandPickerActivity : AppCompatActivity() {
         private const val STEP_CATEGORY = 1
         private const val STEP_BRAND = 2
         private const val STEP_INDEX = 3
+
+        const val EXTRA_CODE_PATH = "code_path"
+        const val EXTRA_CATEGORY_ID = "category_id"
+        const val EXTRA_BRAND_NAME = "brand_name"
     }
 }

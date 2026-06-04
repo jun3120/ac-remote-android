@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.jun3120.acremote.data.ir.IrTransmitter
 import com.jun3120.acremote.ui.brand.BrandPickerActivity
+import com.jun3120.acremote.ui.remote.RemoteControlActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,7 +20,6 @@ class MainActivity : AppCompatActivity() {
 
         btnAddRemote = findViewById(R.id.btn_add_remote)
 
-        // 检查红外硬件
         if (!IrTransmitter.hasIrEmitter(this)) {
             btnAddRemote.text = "添加遥控器（设备不支持红外）"
             btnAddRemote.isEnabled = false
@@ -33,17 +33,22 @@ class MainActivity : AppCompatActivity() {
                 REQUEST_BRAND_PICKER
             )
         }
-
-        // 如果已有已保存的遥控器，显示列表
-        // TODO: 读取本地保存的遥控器列表
     }
 
     @Deprecated("Use registerForActivityResult")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_BRAND_PICKER && resultCode == Activity.RESULT_OK) {
-            Toast.makeText(this, "遥控器已添加，准备控制", Toast.LENGTH_SHORT).show()
-            // TODO: Phase 3 - 跳转到遥控器控制界面
+        if (requestCode == REQUEST_BRAND_PICKER && resultCode == Activity.RESULT_OK && data != null) {
+            val codePath = data.getStringExtra(BrandPickerActivity.EXTRA_CODE_PATH) ?: return
+            val categoryId = data.getIntExtra(BrandPickerActivity.EXTRA_CATEGORY_ID, 1)
+            val brandName = data.getStringExtra(BrandPickerActivity.EXTRA_BRAND_NAME) ?: "空调"
+
+            val intent = Intent(this, RemoteControlActivity::class.java).apply {
+                putExtra(RemoteControlActivity.EXTRA_CODE_PATH, codePath)
+                putExtra(RemoteControlActivity.EXTRA_CATEGORY_ID, categoryId)
+                putExtra(RemoteControlActivity.EXTRA_BRAND_NAME, brandName)
+            }
+            startActivity(intent)
         }
     }
 
