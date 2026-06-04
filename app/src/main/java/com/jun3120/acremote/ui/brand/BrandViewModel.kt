@@ -45,6 +45,8 @@ class BrandViewModel : ViewModel() {
     var selectedBrand: Brand? = null
     // 下载的 bin 文件路径
     var binFilePath: String? = null
+    // 选中型号的 subCategory（irOpen 需要）
+    var selectedSubCategory: Int = 0
 
     fun loadCategories() {
         _loading.value = true
@@ -115,6 +117,7 @@ class BrandViewModel : ViewModel() {
     }
 
     fun downloadBinFile(remoteIndex: RemoteIndex) {
+        selectedSubCategory = remoteIndex.subCate
         _loading.value = true
         Thread {
             webAPIs.downloadBin(
@@ -153,11 +156,13 @@ class BrandViewModel : ViewModel() {
 
         // 保存遥控器记录到本地
         val brandName = selectedBrand?.name ?: "未知"
+        val subCate = remoteIndex.subCate
         RemotePreferences.addRemote(
             App.instance,
             SavedRemote(
                 codePath = file.absolutePath,
                 categoryId = selectedCategory?.id ?: 1,
+                subCategory = subCate,
                 brandName = brandName
             )
         )

@@ -95,6 +95,7 @@ class BrandPickerActivity : AppCompatActivity() {
         val data = Intent().apply {
             putExtra(EXTRA_CODE_PATH, viewModel.binFilePath)
             putExtra(EXTRA_CATEGORY_ID, viewModel.selectedCategory?.id ?: 1)
+            putExtra(EXTRA_SUB_CATEGORY, viewModel.selectedSubCategory)
             putExtra(EXTRA_BRAND_NAME, viewModel.selectedBrand?.name ?: "未知")
         }
         setResult(RESULT_OK, data)
@@ -120,6 +121,7 @@ class BrandPickerActivity : AppCompatActivity() {
 
         const val EXTRA_CODE_PATH = "code_path"
         const val EXTRA_CATEGORY_ID = "category_id"
+        const val EXTRA_SUB_CATEGORY = "sub_category"
         const val EXTRA_BRAND_NAME = "brand_name"
     }
 }

@@ -56,17 +56,23 @@ class RemoteViewModel : ViewModel() {
     val errorEvent: LiveData<String?> = _errorEvent
 
     private var categoryId = 0
+    private var subCategory = 0
     private var initialized = false
 
-    fun init(codePath: String, categoryId: Int, brandName: String) {
+    fun init(codePath: String, categoryId: Int, subCategory: Int, brandName: String) {
         if (initialized) return
         this.categoryId = categoryId
+        this.subCategory = subCategory
         _brandName.value = brandName
 
-        val result = irController.openFile(categoryId, 0, codePath)
+        // 检查文件是否存在
+        val file = java.io.File(codePath)
+        Log.d(TAG, "Opening IR file: $codePath, exists=${file.exists()}, size=${file.length()}, category=$categoryId, subCategory=$subCategory")
+
+        val result = irController.openFile(categoryId, subCategory, codePath)
         if (result != 0) {
-            Log.e(TAG, "Failed to open IR code file: $codePath, error=$result")
-            _errorEvent.value = "红外码库加载失败"
+            Log.e(TAG, "Failed to open IR code file: $codePath, error=$result, file exists=${file.exists()}")
+            _errorEvent.value = "红外码库加载失败 (error=$result)"
             return
         }
 
@@ -78,7 +84,7 @@ class RemoteViewModel : ViewModel() {
         _supportedWindSpeeds.value = irDecode.getACSupportedWindSpeed(Constants.ACMode.MODE_COOL.value)
 
         initialized = true
-        Log.d(TAG, "IR code loaded: $codePath")
+        Log.d(TAG, "IR code loaded successfully: $codePath")
     }
 
     // ===== 用户操作 =====
@@ -143,7 +149,8 @@ class RemoteViewModel : ViewModel() {
             _errorEvent.value = "未初始化"
             return
         }
-        val ok = irController.sendCommand(categoryId, keyCode, acStatus)
+        val ok = irController.sendCommand(categoryId, subCategory, keyCode, acStatus)
+        Log.d(TAG, "send keyCode=$keyCode, ok=$ok")
         if (!ok) {
             _errorEvent.value = "发射失败（检查红外硬件）"
         }

@@ -49,6 +49,7 @@ object RemotePreferences {
 data class SavedRemote(
     val codePath: String,
     val categoryId: Int,
+    val subCategory: Int,
     val brandName: String,
     val savedAt: Long = System.currentTimeMillis()
 )

@@ -78,6 +78,7 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, RemoteControlActivity::class.java).apply {
             putExtra(RemoteControlActivity.EXTRA_CODE_PATH, remote.codePath)
             putExtra(RemoteControlActivity.EXTRA_CATEGORY_ID, remote.categoryId)
+            putExtra(RemoteControlActivity.EXTRA_SUB_CATEGORY, remote.subCategory)
             putExtra(RemoteControlActivity.EXTRA_BRAND_NAME, remote.brandName)
         }
         startActivity(intent)
@@ -89,9 +90,10 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == REQUEST_BRAND_PICKER && resultCode == Activity.RESULT_OK && data != null) {
             val codePath = data.getStringExtra(BrandPickerActivity.EXTRA_CODE_PATH) ?: return
             val categoryId = data.getIntExtra(BrandPickerActivity.EXTRA_CATEGORY_ID, 1)
+            val subCategory = data.getIntExtra(BrandPickerActivity.EXTRA_SUB_CATEGORY, 0)
             val brandName = data.getStringExtra(BrandPickerActivity.EXTRA_BRAND_NAME) ?: "空调"
 
-            openRemote(SavedRemote(codePath, categoryId, brandName))
+            openRemote(SavedRemote(codePath, categoryId, subCategory, brandName))
         }
     }
 

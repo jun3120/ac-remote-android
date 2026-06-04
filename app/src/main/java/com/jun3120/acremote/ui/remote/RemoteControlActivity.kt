@@ -48,6 +48,7 @@ class RemoteControlActivity : AppCompatActivity() {
         // 从 BrandPicker 传入的码库路径初始化
         val codePath = intent.getStringExtra(EXTRA_CODE_PATH)
         val categoryId = intent.getIntExtra(EXTRA_CATEGORY_ID, Constants.CategoryID.AIR_CONDITIONER.value)
+        val subCategory = intent.getIntExtra(EXTRA_SUB_CATEGORY, 0)
         val brandName = intent.getStringExtra(EXTRA_BRAND_NAME) ?: "空调"
 
         if (codePath.isNullOrEmpty()) {
@@ -56,7 +57,7 @@ class RemoteControlActivity : AppCompatActivity() {
             return
         }
 
-        viewModel.init(codePath, categoryId, brandName)
+        viewModel.init(codePath, categoryId, subCategory, brandName)
         tvBrand.text = brandName
     }
 
@@ -132,6 +133,7 @@ class RemoteControlActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_CODE_PATH = "code_path"
         const val EXTRA_CATEGORY_ID = "category_id"
+        const val EXTRA_SUB_CATEGORY = "sub_category"
         const val EXTRA_BRAND_NAME = "brand_name"
     }
 }
