@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#1A1A2E"
     android:gravity="center_horizontal"
     android:padding="24dp">
 
@@ -15,128 +15,140 @@
         android:text="配对中"
         android:textSize="22sp"
         android:textStyle="bold"
+        android:textColor="#FFFFFF"
         android:gravity="center"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="40dp" />
 
     <TextView
         android:id="@+id/tv_model_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text=""
-        android:textSize="16sp"
+        android:textSize="15sp"
         android:gravity="center"
-        android:textColor="?android:attr/textColorSecondary"
-        android:layout_marginTop="12dp" />
+        android:textColor="#8888AA"
+        android:layout_marginTop="8dp" />
 
     <TextView
         android:id="@+id/tv_progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="正在准备..."
-        android:textSize="15sp"
-        android:textColor="?android:attr/textColorSecondary"
-        android:layout_marginTop="8dp"
-        android:minHeight="48dp"
-        android:gravity="center" />
+        android:textSize="14sp"
+        android:gravity="center"
+        android:textColor="#6666AA"
+        android:layout_marginTop="12dp"
+        android:minHeight="40dp" />
 
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="16dp" />
-
-    <!-- 测试按钮区 -->
-    <LinearLayout
-        android:id="@+id/layout_test"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone">
+        android:layout_weight="1">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="将手机红外对准空调"
-            android:textSize="14sp"
-            android:textColor="?android:attr/textColorSecondary" />
+        <!-- 加载中 -->
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_test"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:text="开关测试"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:cornerRadius="100dp"
-            android:layout_marginTop="16dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            app:icon="@android:drawable/ic_lock_power_off"
-            app:iconGravity="textTop"
-            app:iconSize="40dp" />
+        <!-- 测试按钮 -->
+        <LinearLayout
+            android:id="@+id/layout_test"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="点击测试，观察空调是否有反应"
-            android:textSize="13sp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:layout_marginTop="12dp" />
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📡"
+                android:textSize="48sp"
+                android:layout_marginBottom="12dp" />
 
-    <!-- 确认/跳过按钮区 -->
-    <LinearLayout
-        android:id="@+id/layout_confirm"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="将手机顶部红外对准空调"
+                android:textSize="14sp"
+                android:textColor="#8888AA" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="图标"
-            android:textSize="64sp"
-            android:layout_marginBottom="16dp">🔌</TextView>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="点击按钮测试开关"
+                android:textSize="13sp"
+                android:textColor="#6666AA"
+                android:layout_marginTop="4dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="空调有响应吗？"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_test"
+                android:layout_width="180dp"
+                android:layout_height="180dp"
+                android:text="开关测试"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                app:cornerRadius="90dp"
+                app:backgroundTint="#4444CC"
+                android:layout_marginTop="24dp"
+                app:icon="@android:drawable/ic_lock_power_off"
+                app:iconGravity="textTop"
+                app:iconSize="40dp"
+                app:iconTint="#CCCCFF" />
+        </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_match"
-            android:layout_width="240dp"
-            android:layout_height="56dp"
-            android:text="✓ 匹配成功，就用这个"
-            android:textSize="16sp"
-            app:cornerRadius="12dp"
-            style="@style/Widget.Material3.Button"
-            android:layout_marginTop="24dp" />
+        <!-- 确认/跳过 -->
+        <LinearLayout
+            android:id="@+id/layout_confirm"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_skip"
-            android:layout_width="240dp"
-            android:layout_height="56dp"
-            android:text="✗ 没反应，试下一个"
-            android:textSize="16sp"
-            app:cornerRadius="12dp"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_marginTop="12dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✅"
+                android:textSize="56sp"
+                android:layout_marginBottom="12dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="每个型号会发射开关信号，观察空调是否响应"
-            android:textSize="12sp"
-            android:textColor="?android:attr/textColorSecondary"
-            android:layout_marginTop="16dp" />
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="空调有响应吗？"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_match"
+                android:layout_width="260dp"
+                android:layout_height="54dp"
+                android:text="✓ 有反应，就用这个"
+                android:textSize="16sp"
+                android:textColor="#FFFFFF"
+                app:cornerRadius="14dp"
+                app:backgroundTint="#33AA44"
+                android:layout_marginTop="28dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_skip"
+                android:layout_width="260dp"
+                android:layout_height="54dp"
+                android:text="✗ 没反应，试下一个"
+                android:textSize="16sp"
+                android:textColor="#CCCCFF"
+                app:cornerRadius="14dp"
+                app:backgroundTint="#2A2A4E"
+                app:strokeColor="#4444AA"
+                app:strokeWidth="1dp"
+                android:layout_marginTop="12dp" />
+        </LinearLayout>
+
+    </FrameLayout>
 
 </LinearLayout>
