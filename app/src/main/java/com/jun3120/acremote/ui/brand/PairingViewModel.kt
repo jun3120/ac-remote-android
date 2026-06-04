@@ -165,14 +165,14 @@ class PairingViewModel : ViewModel() {
         )
         Log.d(TAG, "test power: pattern length=${pattern.size}")
 
-        val emitted = if (pattern.isNotEmpty()) {
+        val err = if (pattern.isNotEmpty()) {
             IrTransmitter.transmit(App.instance, pattern)
-        } else false
+        } else "pattern empty"
 
         _progressText.postValue(
-            if (emitted) "信号已发射！空调有响应吗？" else "发射失败，检查红外硬件"
+            if (err == null) "信号已发射！空调有响应吗？" else "发射失败: $err"
         )
-        _state.postValue(if (emitted) State.AWAIT_CONFIRM else State.READY)
+        _state.postValue(if (err == null) State.AWAIT_CONFIRM else State.READY)
     }
 
     /** 用户确认匹配成功 */

@@ -24,17 +24,17 @@ class IrController(private val context: Context) {
         return irDecode.openBinary(category, subCategory, binaries, binaries.size)
     }
 
-    /** 解码并发射红外信号 */
-    fun sendCommand(category: Int, subCategory: Int, keyCode: Int, acStatus: ACStatus): Boolean {
+    /** 解码并发射红外信号，@return error message or null on success */
+    fun sendCommand(category: Int, subCategory: Int, keyCode: Int, acStatus: ACStatus): String? {
         val inputKeyCode = translateKeyCode(category, keyCode, acStatus)
-        if (inputKeyCode < 0) return false
+        if (inputKeyCode < 0) return "invalid keyCode"
 
         val pattern = irDecode.decodeBinary(inputKeyCode, acStatus)
         Log.d(TAG, "decoded keyCode=$keyCode, inputKeyCode=$inputKeyCode, pattern length=${pattern.size}")
 
         if (pattern.isEmpty()) {
             Log.w(TAG, "decoded pattern is empty")
-            return false
+            return "decoded pattern empty"
         }
         return IrTransmitter.transmit(context, pattern)
     }

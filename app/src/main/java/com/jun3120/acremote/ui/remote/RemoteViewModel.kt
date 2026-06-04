@@ -183,11 +183,12 @@ class RemoteViewModel : ViewModel() {
             return false
         }
 
-        val ok = IrTransmitter.transmit(App.instance, pattern)
-        if (!ok) {
-            _errorEvent.value = "发射失败（检查红外硬件）"
+        val err = IrTransmitter.transmit(App.instance, pattern)
+        if (err != null) {
+            _errorEvent.value = "发射失败: $err"
+            return false
         }
-        return ok
+        return true
     }
 
     override fun onCleared() {
