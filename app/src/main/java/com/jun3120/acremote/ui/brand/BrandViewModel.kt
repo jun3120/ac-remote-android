@@ -5,6 +5,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.jun3120.acremote.App
+import com.jun3120.acremote.data.local.RemotePreferences
+import com.jun3120.acremote.data.local.SavedRemote
 import net.irext.decode.sdk.utils.Constants
 import net.irext.webapi.WebAPICallbacks
 import net.irext.webapi.model.Brand
@@ -148,6 +150,17 @@ class BrandViewModel : ViewModel() {
         }
         binFilePath = file.absolutePath
         Log.d(TAG, "bin file saved: ${file.absolutePath}, size=${file.length()}")
+
+        // 保存遥控器记录到本地
+        val brandName = selectedBrand?.name ?: "未知"
+        RemotePreferences.addRemote(
+            App.instance,
+            SavedRemote(
+                codePath = file.absolutePath,
+                categoryId = selectedCategory?.id ?: 1,
+                brandName = brandName
+            )
+        )
     }
 
     /** 获取品类名称 */
