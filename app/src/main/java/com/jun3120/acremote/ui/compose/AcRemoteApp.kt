@@ -3,7 +3,6 @@ package com.jun3120.acremote.ui.compose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
-import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -21,14 +20,14 @@ fun AcRemoteApp() {
     val context = LocalContext.current
     var view by remember { mutableStateOf(ViewState.Devices) }
     var selectedBrand by remember { mutableStateOf("格力") }
-    var selectedCategoryId by remember { mutableIntStateOf(1) }
+    var selectedCategoryId by remember { mutableStateOf(1) }
     var selectedIndexesJson by remember { mutableStateOf("[]") }
     var showSaveModal by remember { mutableStateOf(false) }
     var currentCodePath by remember { mutableStateOf("") }
-    var currentCategoryId by remember { mutableIntStateOf(1) }
-    var currentSubCategory by remember { mutableIntStateOf(0) }
+    var currentCategoryId by remember { mutableStateOf(1) }
+    var currentSubCategory by remember { mutableStateOf(0) }
     var currentDeviceName by remember { mutableStateOf("未命名空调") }
-    var pairingKey by remember { mutableIntStateOf(0) }
+    var pairingKey by remember { mutableStateOf(0) }
     var defaultSaveName by remember { mutableStateOf("") }
 
     // Load saved remotes
@@ -72,13 +71,11 @@ fun AcRemoteApp() {
                     }.start()
                 },
             )
-            ViewState.TestRemote -> {
-                // key ensures fresh PairingViewModel each pairing session
-                key(view.toString() + pairingKey.toString()) {
-                    TestRemoteScreen(
+            ViewState.TestRemote -> TestRemoteScreen(
                 brand = selectedBrand,
                 categoryId = selectedCategoryId,
                 indexesJson = selectedIndexesJson,
+                pairingKey = pairingKey,
                 onBack = { view = ViewState.SelectBrand },
                 onSuccess = { codePath, subCategory, brandName ->
                     currentCodePath = codePath
@@ -90,8 +87,6 @@ fun AcRemoteApp() {
                     showSaveModal = true
                 },
             )
-                }
-            }
             ViewState.AcControl -> AcControlScreen(
                 onBack = { view = ViewState.Devices },
                 codePath = currentCodePath,

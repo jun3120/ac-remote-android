@@ -31,9 +31,10 @@ fun TestRemoteScreen(
     indexesJson: String,
     onBack: () -> Unit,
     onSuccess: (codePath: String, subCategory: Int, brandName: String) -> Unit,
+    pairingKey: Int = 0,
     modifier: Modifier = Modifier,
 ) {
-    val vm: PairingViewModel = viewModel()
+    val vm: PairingViewModel = viewModel(key = "pairing_$pairingKey")
 
     LaunchedEffect(Unit) {
         val type = object : com.google.gson.reflect.TypeToken<List<net.irext.webapi.model.RemoteIndex>>() {}.type
