@@ -57,10 +57,12 @@ fun AcControlScreen(
     onCloseModal: () -> Unit,
     onSaveDevice: (String) -> Unit,
     defaultSaveName: String = deviceName,
+    onRename: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val vm: RemoteViewModel = viewModel()
     val context = LocalContext.current
+    var showRenameDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(codePath) { vm.init(codePath, categoryId, subCategory, deviceName) }
 
@@ -80,7 +82,7 @@ fun AcControlScreen(
             Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回", tint = OnSurface) }
                 Text(deviceName, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = OnSurface)
-                IconButton(onClick = {}) { Icon(Icons.Outlined.MoreVert, "更多", tint = OnSurfaceVariant) }
+                IconButton(onClick = { showRenameDialog = true }) { Icon(Icons.Outlined.MoreVert, "更多", tint = OnSurfaceVariant) }
             }
 
             Column(modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -145,6 +147,7 @@ fun AcControlScreen(
         }
 
         if (showSaveModal) SaveRemoteDialog(defaultName = defaultSaveName, onClose = onCloseModal, onSave = { name -> onSaveDevice(name) })
+        if (showRenameDialog) SaveRemoteDialog(defaultName = deviceName, onClose = { showRenameDialog = false }, onSave = { name -> showRenameDialog = false; onRename?.invoke(name) })
     }
 }
 

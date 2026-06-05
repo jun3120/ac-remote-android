@@ -100,6 +100,11 @@ fun AcRemoteApp() {
                     RemotePreferences.updateName(context, currentCodePath, name)
                     devices = savedRemoteToDeviceUi(RemotePreferences.getSavedRemotes(context))
                 },
+                onRename = { name ->
+                    currentDeviceName = name
+                    RemotePreferences.updateName(context, currentCodePath, name)
+                    devices = savedRemoteToDeviceUi(RemotePreferences.getSavedRemotes(context))
+                },
                 defaultSaveName = defaultSaveName,
             )
             ViewState.Profile -> ProfileScreen(
