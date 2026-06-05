@@ -108,7 +108,20 @@ class RemoteViewModel : ViewModel() {
     }
 
     fun toggleSwing() {
-        if (send(KEY_SWING)) _swing.value = !(_swing.value ?: false)
+        // acWindDir 直接作为输出值，先设定目标再发送
+        acWindDir = if (acWindDir == Constants.ACSwing.SWING_ON.value)
+            Constants.ACSwing.SWING_OFF.value
+        else
+            Constants.ACSwing.SWING_ON.value
+
+        if (send(KEY_SWING)) {
+            _swing.value = acWindDir == Constants.ACSwing.SWING_ON.value
+        } else {
+            acWindDir = if (acWindDir == Constants.ACSwing.SWING_ON.value)
+                Constants.ACSwing.SWING_OFF.value
+            else
+                Constants.ACSwing.SWING_ON.value
+        }
     }
 
     fun resetToast() { _toast.value = null }
@@ -136,6 +149,7 @@ class RemoteViewModel : ViewModel() {
     // 因此需要跟踪要发送的目标状态
     private var acTemp = Constants.ACTemperature.TEMP_24.value
     private var acPower = Constants.ACPower.POWER_ON.value  // 0=ON, 1=OFF
+    private var acWindDir = Constants.ACSwing.SWING_ON.value // 0=ON, 1=OFF
 
     /** 构造 ACStatus — 所有字段为要编码的目标值 */
     private fun currentStatus(): ACStatus {
@@ -144,7 +158,7 @@ class RemoteViewModel : ViewModel() {
             Constants.ACMode.MODE_COOL.value,
             acTemp,
             Constants.ACWindSpeed.SPEED_AUTO.value,
-            Constants.ACSwing.SWING_ON.value,
+            acWindDir,
             0, 0, 0, 0
         )
     }
