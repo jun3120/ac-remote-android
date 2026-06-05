@@ -40,9 +40,12 @@ import com.jun3120.acremote.ui.compose.theme.SurfaceLowest
 @Composable
 fun SaveRemoteDialog(defaultName: String, onClose: () -> Unit, onSave: (String) -> Unit) {
     var name by remember(defaultName) { mutableStateOf(defaultName) }
-    Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = false)
+    ) {
         Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp), contentAlignment = Alignment.Center) {
-            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)).clickable(onClick = onClose))
+            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)))
             Column(
                 modifier = Modifier.fillMaxWidth().shadow(24.dp, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp)).background(SurfaceLowest).padding(24.dp)
             ) {
