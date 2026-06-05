@@ -48,8 +48,11 @@ fun TestRemoteScreen(
 
     val pairResult by vm.pairResult.observeAsState()
 
-    LaunchedEffect(pairResult) {
-        pairResult?.let { onSuccess(it.codePath, it.subCategory, it.brandName) }
+    LaunchedEffect(state, pairResult) {
+        val r = pairResult
+        if (state == PairingViewModel.State.SUCCESS && r != null) {
+            onSuccess(r.codePath, r.subCategory, r.brandName)
+        }
     }
 
     Column(modifier = modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Surface, TestRemoteGradientEnd))).padding(top = 40.dp, bottom = 48.dp)) {
