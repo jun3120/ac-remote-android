@@ -1,0 +1,25 @@
+package com.jun3120.acremote.ui.compose.theme
+
+import androidx.compose.ui.graphics.Color
+
+val Primary = Color(0xFF0058BC)
+val PrimaryActive = Color(0xFF004BA0)
+val Surface = Color(0xFFFAF9FE)
+val SurfaceLowest = Color(0xFFFFFFFF)
+val SurfaceLow = Color(0xFFF4F3F8)
+val SurfaceHigh = Color(0xFFE9E7ED)
+val OnSurface = Color(0xFF1A1B1F)
+val OnSurfaceVariant = Color(0xFF414755)
+val Outline = Color(0xFFC1C6D7)
+val PrimaryContainer = Color(0xFFD8E2FF)
+val OnPrimaryContainer = Color(0xFF001A41)
+val Blue100 = Color(0xFFDBEAFE)
+val Cyan100 = Color(0xFFCFFAFE)
+val Cyan700 = Color(0xFF0E7490)
+val Gray100 = Color(0xFFF3F4F6)
+val Gray500 = Color(0xFF6B7280)
+val Orange100 = Color(0xFFFFEDD5)
+val Orange600 = Color(0xFFEA580C)
+val Blue50 = Color(0xFFEFF6FF)
+val Green500 = Color(0xFF22C55E)
+val TestRemoteGradientEnd = Color(0x80EFF6FF)
