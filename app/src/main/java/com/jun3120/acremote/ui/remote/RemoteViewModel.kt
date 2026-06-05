@@ -63,7 +63,21 @@ class RemoteViewModel : ViewModel() {
     // key_code 使用 native ir_ac_control 的实际映射值。
 
     fun togglePower() {
-        if (send(KEY_POWER)) _powerOn.value = !(_powerOn.value ?: false)
+        // acPower 直接作为输出值，先设定目标再发送（同温度逻辑）
+        acPower = if (acPower == Constants.ACPower.POWER_ON.value)
+            Constants.ACPower.POWER_OFF.value
+        else
+            Constants.ACPower.POWER_ON.value
+
+        if (send(KEY_POWER)) {
+            _powerOn.value = acPower == Constants.ACPower.POWER_ON.value
+        } else {
+            // 失败回退
+            acPower = if (acPower == Constants.ACPower.POWER_ON.value)
+                Constants.ACPower.POWER_OFF.value
+            else
+                Constants.ACPower.POWER_ON.value
+        }
     }
 
     fun tempUp() {
@@ -118,13 +132,15 @@ class RemoteViewModel : ViewModel() {
 
     // === 内部 ===
 
-    // 温度需要跟踪（解码库从 acTemp 计算实际输出温度），其余用固定值
+    // 解码库直接使用 ACStatus 值编码到红外帧（不做 +/-1 或切换）
+    // 因此需要跟踪要发送的目标状态
     private var acTemp = Constants.ACTemperature.TEMP_24.value
+    private var acPower = Constants.ACPower.POWER_ON.value  // 0=ON, 1=OFF
 
-    /** 构造 ACStatus — 温度传递当前值，其余固定 */
+    /** 构造 ACStatus — 所有字段为要编码的目标值 */
     private fun currentStatus(): ACStatus {
         return ACStatus(
-            Constants.ACPower.POWER_ON.value,
+            acPower,
             Constants.ACMode.MODE_COOL.value,
             acTemp,
             Constants.ACWindSpeed.SPEED_AUTO.value,
