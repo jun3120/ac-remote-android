@@ -67,16 +67,21 @@ class RemoteViewModel : ViewModel() {
     }
 
     fun tempUp() {
+        // acTemp 直接作为输出温度（解码库不做 +1/-1），先设定目标再发送
+        acTemp += 1
         if (send(KEY_TEMP_UP)) {
-            acTemp += 1
             _temperature.value = acTemp + 16
+        } else {
+            acTemp -= 1  // 失败回退
         }
     }
 
     fun tempDown() {
+        acTemp -= 1
         if (send(KEY_TEMP_DN)) {
-            acTemp -= 1
             _temperature.value = acTemp + 16
+        } else {
+            acTemp += 1
         }
     }
 
