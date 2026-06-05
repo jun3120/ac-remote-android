@@ -69,7 +69,7 @@ fun DeviceListScreen(
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(Icons.Outlined.PhoneAndroid, null, tint = Primary, modifier = Modifier.size(24.dp))
-                    Text("AC Remote", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Primary)
+                    Text("空调遥控器", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Primary)
                 }
                 Spacer(Modifier.size(48.dp))
             }
