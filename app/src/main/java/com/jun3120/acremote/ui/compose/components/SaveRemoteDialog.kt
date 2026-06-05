@@ -44,10 +44,9 @@ fun SaveRemoteDialog(defaultName: String, onClose: () -> Unit, onSave: (String) 
         onDismissRequest = {},
         properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = false)
     ) {
-        Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp), contentAlignment = Alignment.Center) {
-            Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)))
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.4f)), contentAlignment = Alignment.Center) {
             Column(
-                modifier = Modifier.fillMaxWidth().shadow(24.dp, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp)).background(SurfaceLowest).padding(24.dp)
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).shadow(24.dp, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp)).background(SurfaceLowest).padding(24.dp)
             ) {
                 Text("保存遥控器", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = OnSurface, modifier = Modifier.padding(bottom = 24.dp))
                 Text("设备名称", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = OnSurfaceVariant, modifier = Modifier.padding(start = 4.dp, bottom = 8.dp))
