@@ -14,13 +14,7 @@ class RemoteViewModel : ViewModel() {
 
     private val irDecode = IRDecode.getInstance()
 
-    // 解码库只追踪模式/温度/风速/扫风（电源始终传 ON，实际开关由解码库 apply_function 处理）
-    private var acMode = Constants.ACMode.MODE_COOL.value
-    private var acTemp = Constants.ACTemperature.TEMP_24.value
-    private var acWindSpeed = Constants.ACWindSpeed.SPEED_AUTO.value
-    private var acWindDir = Constants.ACSwing.SWING_ON.value
-
-    // === UI 状态 ===
+    // === UI 状态（独立于解码库内部状态） ===
     private val _powerOn = MutableLiveData(true)
     val powerOn: LiveData<Boolean> = _powerOn
 
@@ -64,14 +58,12 @@ class RemoteViewModel : ViewModel() {
     }
 
     // === 操作 ===
-    // 使用 IRext Remote.java 定义的原始 keyCode（0-11），而非 ACFunction 枚举值（1-7）。
-    // Native ir_ac_control 内部做 key_code→function_code 映射。
-    // 始终传 acPower=POWER_ON，保证全部 apply 函数运行。
+    // ACStatus 始终传固定基准值（对齐 IRext 示例 ControlHelper）。
+    // 解码库内部自行跟踪状态变化，acStatus 仅用于校验合法性。
+    // key_code 使用 native ir_ac_control 的实际映射值。
 
     fun togglePower() {
-        if (send(KEY_POWER)) {
-            _powerOn.value = !(_powerOn.value ?: false)
-        }
+        if (send(KEY_POWER)) _powerOn.value = !(_powerOn.value ?: false)
     }
 
     fun tempUp() {
@@ -89,25 +81,15 @@ class RemoteViewModel : ViewModel() {
     }
 
     fun cycleMode() {
-        if (send(KEY_MODE)) {
-            acMode = (acMode + 1) % 5
-            _mode.value = acMode
-        }
+        if (send(KEY_MODE)) _mode.value = ((_mode.value ?: 0) + 1) % 5
     }
 
     fun cycleWindSpeed() {
-        if (send(KEY_WIND_SPD)) {
-            acWindSpeed = (acWindSpeed + 1) % 4
-            _fanSpeed.value = acWindSpeed
-        }
+        if (send(KEY_WIND_SPD)) _fanSpeed.value = ((_fanSpeed.value ?: 0) + 1) % 4
     }
 
     fun toggleSwing() {
-        if (send(KEY_SWING)) {
-            acWindDir = if (acWindDir == Constants.ACSwing.SWING_ON.value)
-                Constants.ACSwing.SWING_OFF.value else Constants.ACSwing.SWING_ON.value
-            _swing.value = acWindDir == Constants.ACSwing.SWING_ON.value
-        }
+        if (send(KEY_SWING)) _swing.value = !(_swing.value ?: false)
     }
 
     fun resetToast() { _toast.value = null }
@@ -131,30 +113,30 @@ class RemoteViewModel : ViewModel() {
 
     // === 内部 ===
 
-    /** 构造 ACStatus — acPower 始终为 ON，确保解码库运行全部 apply 函数 */
+    // 温度需要跟踪（解码库从 acTemp 计算实际输出温度），其余用固定值
+    private var acTemp = Constants.ACTemperature.TEMP_24.value
+
+    /** 构造 ACStatus — 温度传递当前值，其余固定 */
     private fun currentStatus(): ACStatus {
         return ACStatus(
-            Constants.ACPower.POWER_ON.value,  // always ON
-            acMode,
+            Constants.ACPower.POWER_ON.value,
+            Constants.ACMode.MODE_COOL.value,
             acTemp,
-            acWindSpeed,
-            acWindDir,
-            0,  // display
-            0,  // sleep
-            0,  // timer
-            0   // changeWindDir
+            Constants.ACWindSpeed.SPEED_AUTO.value,
+            Constants.ACSwing.SWING_ON.value,
+            0, 0, 0, 0
         )
     }
 
-    private fun send(functionCode: Int): Boolean {
+    private fun send(keyCode: Int): Boolean {
         if (!initialized) { _toast.value = "未初始化"; return false }
 
         val status = currentStatus()
-        val pattern = irDecode.decodeBinary(functionCode, status)
-        Log.d(TAG, "send func=$functionCode mode=${status.acMode} temp=${status.acTemp} -> patternLen=${pattern.size}")
+        val pattern = irDecode.decodeBinary(keyCode, status)
+        Log.d(TAG, "send key=$keyCode -> patternLen=${pattern.size}")
 
         if (pattern.isEmpty()) {
-            _toast.value = "红外编码为空 (func=$functionCode)"
+            _toast.value = "红外编码为空 (key=$keyCode)"
             return false
         }
         val err = IrTransmitter.transmit(App.instance, pattern)
@@ -170,9 +152,9 @@ class RemoteViewModel : ViewModel() {
     companion object {
         private const val TAG = "RemoteViewModel"
 
-        // Native ir_ac_control key_code→function 映射 (from C source):
+        // Native ir_ac_control key_code 映射:
         //   0→POWER, 1→MODE, 2→TEMP_UP, 3→TEMP_DOWN,
-        //   7→TEMP_UP, 8→TEMP_DOWN, 9→WIND_SPEED, 10→SWING, 11→WIND_FIX
+        //   9→WIND_SPEED, 10→SWING
         private const val KEY_POWER    = 0
         private const val KEY_MODE     = 1
         private const val KEY_TEMP_UP  = 2
