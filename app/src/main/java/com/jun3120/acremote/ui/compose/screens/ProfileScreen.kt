@@ -11,8 +11,7 @@ import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,6 +59,13 @@ fun ProfileScreen(modifier: Modifier = Modifier) {
         }
 
         Spacer(Modifier.height(8.dp))
+
+        // Dark mode toggle
+        var dark by remember { mutableStateOf(com.jun3120.acremote.ui.compose.theme.ThemeManager.isDark) }
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp)) {
+            Text("深色模式", fontSize = 14.sp, color = OnSurfaceVariant, modifier = Modifier.weight(1f))
+            androidx.compose.material3.Switch(checked = dark, onCheckedChange = { dark = it; com.jun3120.acremote.ui.compose.theme.ThemeManager.isDark = it })
+        }
 
         Column(modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 24.dp)) {
             Column(modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp)).background(SurfaceLowest).padding(vertical = 8.dp)) {
