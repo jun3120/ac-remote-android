@@ -66,27 +66,16 @@ fun ProfileScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
 
         // 使用统计卡片
         val stats = com.jun3120.acremote.data.usage.UsageTracker.getStats(context)
-        if (stats.totalActions > 0) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 16.dp)
-                    .shadow(2.dp, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp))
-                    .background(SurfaceLowest).padding(20.dp)
-            ) {
-                Text("使用统计", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = OnSurface, modifier = Modifier.padding(bottom = 12.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("${stats.favoriteTemp}°C", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Primary)
-                        Text("偏好温度", fontSize = 12.sp, color = OnSurfaceVariant)
-                    }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(stats.favoriteMode, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Primary)
-                        Text("常用模式", fontSize = 12.sp, color = OnSurfaceVariant)
-                    }
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(formatMinutes(stats.totalRuntimeMinutes), fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Primary)
-                        Text("累计运行", fontSize = 12.sp, color = OnSurfaceVariant)
-                    }
-                }
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 16.dp)
+                .shadow(2.dp, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp))
+                .background(SurfaceLowest).padding(20.dp)
+        ) {
+            Text("使用统计", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = OnSurface, modifier = Modifier.padding(bottom = 12.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                StatItem("${stats.favoriteTemp}°C", "偏好温度")
+                StatItem(if (stats.totalActions > 0) stats.favoriteMode else "--", "常用模式")
+                StatItem(formatMinutes(stats.totalRuntimeMinutes), "累计运行")
             }
         }
 
@@ -108,6 +97,14 @@ fun ProfileScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         }
 
         Text("版本号 v1.0.0", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Outline, modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+    }
+}
+
+@Composable
+private fun StatItem(value: String, label: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(value, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Primary)
+        Text(label, fontSize = 12.sp, color = OnSurfaceVariant)
     }
 }
 
