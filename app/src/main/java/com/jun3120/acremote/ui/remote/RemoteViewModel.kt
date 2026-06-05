@@ -64,48 +64,46 @@ class RemoteViewModel : ViewModel() {
     }
 
     // === 操作 ===
-    // 关键设计（基于 ir_ac_control.c 源码）：
-    // 解码器只在 acPower=ON 时运行全部 apply 函数（mode/temp/wind/swing）。
-    // acPower=OFF 时只运行 apply_power，其余跳过 → 红外编码为空。
-    // 因此所有操作都传 acPower=POWER_ON，电源切换由 apply_function(SWITCH_POWER) 完成。
+    // 使用 IRext Remote.java 定义的原始 keyCode（0-11），而非 ACFunction 枚举值（1-7）。
+    // Native ir_ac_control 内部做 key_code→function_code 映射。
+    // 始终传 acPower=POWER_ON，保证全部 apply 函数运行。
 
     fun togglePower() {
-        // 始终传 POWER_ON，解码库 apply_function 处理电源切换
-        if (send(Constants.ACFunction.FUNCTION_SWITCH_POWER.value)) {
+        if (send(KEY_POWER)) {
             _powerOn.value = !(_powerOn.value ?: false)
         }
     }
 
     fun tempUp() {
-        if (send(Constants.ACFunction.FUNCTION_TEMPERATURE_UP.value)) {
+        if (send(KEY_PLUS)) {
             acTemp += 1
             _temperature.value = acTemp + 16
         }
     }
 
     fun tempDown() {
-        if (send(Constants.ACFunction.FUNCTION_TEMPERATURE_DOWN.value)) {
+        if (send(KEY_MINUS)) {
             acTemp -= 1
             _temperature.value = acTemp + 16
         }
     }
 
     fun cycleMode() {
-        if (send(Constants.ACFunction.FUNCTION_CHANGE_MODE.value)) {
+        if (send(KEY_RIGHT)) {
             acMode = (acMode + 1) % 5
             _mode.value = acMode
         }
     }
 
     fun cycleWindSpeed() {
-        if (send(Constants.ACFunction.FUNCTION_SWITCH_WIND_SPEED.value)) {
+        if (send(KEY_UP)) {
             acWindSpeed = (acWindSpeed + 1) % 4
             _fanSpeed.value = acWindSpeed
         }
     }
 
     fun toggleSwing() {
-        if (send(Constants.ACFunction.FUNCTION_SWITCH_SWING.value)) {
+        if (send(KEY_OK)) {
             acWindDir = if (acWindDir == Constants.ACSwing.SWING_ON.value)
                 Constants.ACSwing.SWING_OFF.value else Constants.ACSwing.SWING_ON.value
             _swing.value = acWindDir == Constants.ACSwing.SWING_ON.value
@@ -171,5 +169,18 @@ class RemoteViewModel : ViewModel() {
 
     companion object {
         private const val TAG = "RemoteViewModel"
+
+        // IRext Remote.java 原始 keyCode 常量
+        private const val KEY_POWER = 0
+        private const val KEY_UP = 1
+        private const val KEY_DOWN = 2
+        private const val KEY_LEFT = 3
+        private const val KEY_RIGHT = 4
+        private const val KEY_OK = 5
+        private const val KEY_PLUS = 6
+        private const val KEY_MINUS = 7
+        private const val KEY_BACK = 8
+        private const val KEY_HOME = 9
+        private const val KEY_MENU = 10
     }
 }
