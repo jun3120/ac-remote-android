@@ -14,6 +14,17 @@ class RemoteViewModel : ViewModel() {
 
     private val irDecode = IRDecode.getInstance()
 
+    // === 追踪空调真实当前状态 ===
+    private var acPower = Constants.ACPower.POWER_OFF.value     // 1=OFF, 0=ON
+    private var acMode = Constants.ACMode.MODE_COOL.value       // 0=COOL
+    private var acTemp = Constants.ACTemperature.TEMP_24.value  // 8=24°C
+    private var acWindSpeed = Constants.ACWindSpeed.SPEED_AUTO.value
+    private var acWindDir = Constants.ACSwing.SWING_ON.value
+    private var acDisplay = 0
+    private var acSleep = 0
+    private var acTimer = 0
+    private var changeWindDir = 0
+
     // === UI 状态 ===
     private val _powerOn = MutableLiveData(false)
     val powerOn: LiveData<Boolean> = _powerOn
@@ -46,52 +57,80 @@ class RemoteViewModel : ViewModel() {
         Log.d(TAG, "openFile: $codePath exists=${file.exists()} size=${file.length()} cat=$categoryId sub=$subCategory")
 
         irDecode.closeBinary()
-        val result = irDecode.openFile(categoryId, subCategory, codePath)
-        if (result != 0) {
-            Log.e(TAG, "openFile failed: $result")
-            _toast.value = "红外码库加载失败 (err=$result)"
-            return
-        }
+        val r = irDecode.openFile(categoryId, subCategory, codePath)
+        if (r != 0) { _toast.value = "红外码库加载失败 (err=$r)"; return }
+
+        // 查询此码库支持的功能范围
+        try {
+            val tr = irDecode.getTemperatureRange(Constants.ACMode.MODE_COOL.value)
+            Log.d(TAG, "温度范围: ${tr.tempMin + 16} ~ ${tr.tempMax + 16}")
+        } catch (_: Exception) {}
+
         initialized = true
         Log.d(TAG, "init success")
     }
 
-    // === 操作：IRext 约定 — ACStatus 始终用固定基准值，解码库自行跟踪状态 ===
+    // === 操作 ===
 
     fun togglePower() {
-        // 永远传 POWER_OFF，解码库内部切换
-        if (send(Constants.ACFunction.FUNCTION_SWITCH_POWER.value)) {
-            _powerOn.value = !(_powerOn.value ?: false)
+        // 传入当前真实 power 状态，解码库据此判断切换方向
+        val status = currentStatus()
+        if (send(Constants.ACFunction.FUNCTION_SWITCH_POWER.value, status)) {
+            // 解码库内部已切换，同步本地状态
+            acPower = if (acPower == Constants.ACPower.POWER_OFF.value)
+                Constants.ACPower.POWER_ON.value
+            else
+                Constants.ACPower.POWER_OFF.value
+            _powerOn.value = acPower == Constants.ACPower.POWER_ON.value
         }
     }
 
     fun tempUp() {
-        if (send(Constants.ACFunction.FUNCTION_TEMPERATURE_UP.value)) {
-            val cur = _temperature.value ?: 24
-            _temperature.value = cur + 1
+        val status = currentStatus()
+        Log.d(TAG, "tempUp: current temp=$acTemp (${acTemp + 16}°C)")
+        if (send(Constants.ACFunction.FUNCTION_TEMPERATURE_UP.value, status)) {
+            acTemp += 1
+            _temperature.value = acTemp + 16
         }
     }
 
     fun tempDown() {
-        if (send(Constants.ACFunction.FUNCTION_TEMPERATURE_DOWN.value)) {
-            val cur = _temperature.value ?: 24
-            _temperature.value = cur - 1
+        val status = currentStatus()
+        Log.d(TAG, "tempDown: current temp=$acTemp (${acTemp + 16}°C)")
+        if (send(Constants.ACFunction.FUNCTION_TEMPERATURE_DOWN.value, status)) {
+            acTemp -= 1
+            _temperature.value = acTemp + 16
         }
     }
 
     fun cycleMode() {
-        if (send(Constants.ACFunction.FUNCTION_CHANGE_MODE.value)) {
-            val cur = _mode.value ?: Constants.ACMode.MODE_COOL.value
-            _mode.value = (cur + 1) % 5
+        val status = currentStatus()
+        if (send(Constants.ACFunction.FUNCTION_CHANGE_MODE.value, status)) {
+            acMode = (acMode + 1) % 5
+            _mode.value = acMode
         }
     }
 
     fun cycleWindSpeed() {
-        if (send(Constants.ACFunction.FUNCTION_SWITCH_WIND_SPEED.value)) {
-            val cur = _fanSpeed.value ?: Constants.ACWindSpeed.SPEED_AUTO.value
-            _fanSpeed.value = (cur + 1) % 4
+        val status = currentStatus()
+        if (send(Constants.ACFunction.FUNCTION_SWITCH_WIND_SPEED.value, status)) {
+            acWindSpeed = (acWindSpeed + 1) % 4
+            _fanSpeed.value = acWindSpeed
         }
     }
+
+    fun toggleSwing() {
+        val status = currentStatus()
+        if (send(Constants.ACFunction.FUNCTION_SWITCH_SWING.value, status)) {
+            acWindDir = if (acWindDir == Constants.ACSwing.SWING_ON.value)
+                Constants.ACSwing.SWING_OFF.value
+            else
+                Constants.ACSwing.SWING_ON.value
+            _swing.value = acWindDir == Constants.ACSwing.SWING_ON.value
+        }
+    }
+
+    fun resetToast() { _toast.value = null }
 
     fun modeDisplayName(m: Int): String = when (m) {
         Constants.ACMode.MODE_COOL.value -> "制冷"
@@ -110,54 +149,26 @@ class RemoteViewModel : ViewModel() {
         else -> "未知"
     }
 
-    fun toggleSwing() {
-        if (send(Constants.ACFunction.FUNCTION_SWITCH_SWING.value)) {
-            _swing.value = !(_swing.value ?: false)
-        }
-    }
-
-    fun resetToast() {
-        _toast.value = null
-    }
-
     // === 内部 ===
 
-    /**
-     * 发送红外指令。
-     * 严格遵循 IRext 示例：构造固定基准 ACStatus，仅通过 functionCode 表达操作。
-     */
-    private fun send(functionCode: Int): Boolean {
-        if (!initialized) {
-            _toast.value = "未初始化"
-            return false
-        }
+    /** 构造反映当前真实状态的 ACStatus */
+    private fun currentStatus(): ACStatus {
+        return ACStatus(acPower, acMode, acTemp, acWindSpeed, acWindDir,
+            acDisplay, acSleep, acTimer, changeWindDir)
+    }
 
-        // 固定基准 ACStatus，每次全新构造，永远不改值
-        val acStatus = ACStatus().apply {
-            acPower = Constants.ACPower.POWER_OFF.value
-            acMode = Constants.ACMode.MODE_COOL.value
-            acTemp = Constants.ACTemperature.TEMP_24.value
-            acWindSpeed = Constants.ACWindSpeed.SPEED_AUTO.value
-            acWindDir = Constants.ACSwing.SWING_ON.value
-            changeWindDir = 0
-            acDisplay = 0
-            acTimer = 0
-            acSleep = 0
-        }
+    private fun send(functionCode: Int, acStatus: ACStatus): Boolean {
+        if (!initialized) { _toast.value = "未初始化"; return false }
 
         val pattern = irDecode.decodeBinary(functionCode, acStatus)
-        Log.d(TAG, "decode func=$functionCode patternLen=${pattern.size}")
+        Log.d(TAG, "send func=$functionCode power=${acStatus.acPower} mode=${acStatus.acMode} temp=${acStatus.acTemp} -> patternLen=${pattern.size}")
 
         if (pattern.isEmpty()) {
             _toast.value = "红外编码为空 (func=$functionCode)"
             return false
         }
-
         val err = IrTransmitter.transmit(App.instance, pattern)
-        if (err != null) {
-            _toast.value = err
-            return false
-        }
+        if (err != null) { _toast.value = err; return false }
         return true
     }
 
