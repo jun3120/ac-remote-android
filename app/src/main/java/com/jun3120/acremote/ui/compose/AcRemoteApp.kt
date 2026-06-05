@@ -14,7 +14,7 @@ import com.jun3120.acremote.ui.compose.components.BottomTab
 import com.jun3120.acremote.ui.compose.screens.*
 import com.jun3120.acremote.ui.compose.theme.Surface
 
-enum class ViewState { Devices, SelectBrand, TestRemote, AcControl, Profile }
+enum class ViewState { Devices, SelectBrand, TestRemote, AcControl, Profile, Tips }
 
 @Composable
 fun AcRemoteApp() {
@@ -120,12 +120,23 @@ fun AcRemoteApp() {
                 defaultSaveName = defaultSaveName,
             )
             ViewState.Profile -> ProfileScreen()
+            ViewState.Tips -> TipsScreen()
         }
 
-        if (view == ViewState.Devices || view == ViewState.Profile) {
+        if (view == ViewState.Devices || view == ViewState.Profile || view == ViewState.Tips) {
             BottomNavBar(
-                active = if (view == ViewState.Profile) BottomTab.Profile else BottomTab.Remote,
-                onChange = { tab -> view = if (tab == BottomTab.Profile) ViewState.Profile else ViewState.Devices },
+                active = when (view) {
+                    ViewState.Profile -> BottomTab.Profile
+                    ViewState.Tips -> BottomTab.Tips
+                    else -> BottomTab.Remote
+                },
+                onChange = { tab ->
+                    view = when (tab) {
+                        BottomTab.Remote -> ViewState.Devices
+                        BottomTab.Tips -> ViewState.Tips
+                        BottomTab.Profile -> ViewState.Profile
+                    }
+                },
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }

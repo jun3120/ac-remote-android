@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material3.Icon
@@ -28,7 +29,7 @@ import com.jun3120.acremote.ui.compose.theme.OnSurfaceVariant
 import com.jun3120.acremote.ui.compose.theme.Primary
 import com.jun3120.acremote.ui.compose.theme.SurfaceLowest
 
-enum class BottomTab { Remote, Profile }
+enum class BottomTab { Remote, Tips, Profile }
 
 @Composable
 fun BottomNavBar(
@@ -46,6 +47,7 @@ fun BottomNavBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BottomNavItem(Icons.Outlined.PhoneAndroid, "遥控", active == BottomTab.Remote) { onChange(BottomTab.Remote) }
+        BottomNavItem(Icons.Outlined.Lightbulb, "技巧", active == BottomTab.Tips) { onChange(BottomTab.Tips) }
         BottomNavItem(Icons.Outlined.Person, "我的", active == BottomTab.Profile) { onChange(BottomTab.Profile) }
     }
 }
@@ -55,7 +57,7 @@ private fun BottomNavItem(icon: ImageVector, label: String, selected: Boolean, o
     val color = if (selected) Primary else OnSurfaceVariant
     val bg = if (selected) Primary.copy(alpha = 0.1f) else androidx.compose.ui.graphics.Color.Transparent
     Column(
-        modifier = Modifier.width(80.dp).clip(RoundedCornerShape(12.dp)).background(bg).clickable(onClick = onClick).padding(vertical = 4.dp),
+        modifier = Modifier.width(64.dp).clip(RoundedCornerShape(12.dp)).background(bg).clickable(onClick = onClick).padding(vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
