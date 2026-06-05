@@ -43,7 +43,7 @@ fun ProfileScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回", tint = Primary) }
             Text("我的", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = OnSurface)
-            IconButton(onClick = {}) { Icon(Icons.Outlined.MoreVert, "更多", tint = OnSurfaceVariant) }
+            Spacer(Modifier.size(48.dp))
         }
         Spacer(Modifier.height(32.dp))
 

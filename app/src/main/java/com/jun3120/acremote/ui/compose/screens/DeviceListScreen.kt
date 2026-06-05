@@ -23,9 +23,7 @@ import androidx.compose.material.icons.outlined.AcUnit
 import androidx.compose.material.icons.outlined.Air
 import androidx.compose.material.icons.outlined.Business
 import androidx.compose.material.icons.outlined.Hotel
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.PhoneAndroid
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -73,10 +71,7 @@ fun DeviceListScreen(
                     Icon(Icons.Outlined.PhoneAndroid, null, tint = Primary, modifier = Modifier.size(24.dp))
                     Text("AC Remote", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Primary)
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Icon(Icons.Outlined.Search, "搜索", tint = OnSurfaceVariant, modifier = Modifier.size(24.dp))
-                    Icon(Icons.Outlined.MoreVert, "更多", tint = OnSurfaceVariant, modifier = Modifier.size(24.dp))
-                }
+                Spacer(Modifier.size(48.dp))
             }
             Spacer(Modifier.height(32.dp))
             Text("我的设备", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = OnSurface)
