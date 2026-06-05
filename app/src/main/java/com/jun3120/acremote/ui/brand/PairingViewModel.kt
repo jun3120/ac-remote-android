@@ -160,9 +160,8 @@ class PairingViewModel : ViewModel() {
             acWindDir = Constants.ACSwing.SWING_ON.value
         }
 
-        val pattern = irDecode.decodeBinary(
-            Constants.ACFunction.FUNCTION_SWITCH_POWER.value, acStatus
-        )
+        // key_code=0 → native maps to AC_FUNCTION_POWER
+        val pattern = irDecode.decodeBinary(0, acStatus)
         Log.d(TAG, "test power: pattern length=${pattern.size}")
 
         val err = if (pattern.isNotEmpty()) {

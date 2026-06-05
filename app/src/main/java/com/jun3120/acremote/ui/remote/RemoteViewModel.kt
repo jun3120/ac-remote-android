@@ -75,35 +75,35 @@ class RemoteViewModel : ViewModel() {
     }
 
     fun tempUp() {
-        if (send(KEY_PLUS)) {
+        if (send(KEY_TEMP_UP)) {
             acTemp += 1
             _temperature.value = acTemp + 16
         }
     }
 
     fun tempDown() {
-        if (send(KEY_MINUS)) {
+        if (send(KEY_TEMP_DN)) {
             acTemp -= 1
             _temperature.value = acTemp + 16
         }
     }
 
     fun cycleMode() {
-        if (send(KEY_RIGHT)) {
+        if (send(KEY_MODE)) {
             acMode = (acMode + 1) % 5
             _mode.value = acMode
         }
     }
 
     fun cycleWindSpeed() {
-        if (send(KEY_UP)) {
+        if (send(KEY_WIND_SPD)) {
             acWindSpeed = (acWindSpeed + 1) % 4
             _fanSpeed.value = acWindSpeed
         }
     }
 
     fun toggleSwing() {
-        if (send(KEY_OK)) {
+        if (send(KEY_SWING)) {
             acWindDir = if (acWindDir == Constants.ACSwing.SWING_ON.value)
                 Constants.ACSwing.SWING_OFF.value else Constants.ACSwing.SWING_ON.value
             _swing.value = acWindDir == Constants.ACSwing.SWING_ON.value
@@ -170,17 +170,14 @@ class RemoteViewModel : ViewModel() {
     companion object {
         private const val TAG = "RemoteViewModel"
 
-        // IRext Remote.java 原始 keyCode 常量
-        private const val KEY_POWER = 0
-        private const val KEY_UP = 1
-        private const val KEY_DOWN = 2
-        private const val KEY_LEFT = 3
-        private const val KEY_RIGHT = 4
-        private const val KEY_OK = 5
-        private const val KEY_PLUS = 6
-        private const val KEY_MINUS = 7
-        private const val KEY_BACK = 8
-        private const val KEY_HOME = 9
-        private const val KEY_MENU = 10
+        // Native ir_ac_control key_code→function 映射 (from C source):
+        //   0→POWER, 1→MODE, 2→TEMP_UP, 3→TEMP_DOWN,
+        //   7→TEMP_UP, 8→TEMP_DOWN, 9→WIND_SPEED, 10→SWING, 11→WIND_FIX
+        private const val KEY_POWER    = 0
+        private const val KEY_MODE     = 1
+        private const val KEY_TEMP_UP  = 2
+        private const val KEY_TEMP_DN  = 3
+        private const val KEY_WIND_SPD = 9
+        private const val KEY_SWING    = 10
     }
 }
