@@ -18,11 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.jun3120.acremote.ui.compose.theme.*
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
@@ -46,23 +44,7 @@ fun ProfileScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
             Text("我的", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = OnSurface)
             Spacer(Modifier.size(48.dp))
         }
-        Spacer(Modifier.height(32.dp))
-
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-            Box {
-                AsyncImage(model = "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=200&h=200",
-                    contentDescription = "用户头像", contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(80.dp).clip(CircleShape).background(SurfaceLowest).shadow(2.dp, CircleShape))
-                Box(modifier = Modifier.align(Alignment.BottomEnd).size(24.dp).clip(CircleShape).background(SurfaceLowest).padding(3.dp)) {
-                    Box(modifier = Modifier.fillMaxSize().clip(CircleShape).background(Green500))
-                }
-            }
-            Column {
-                Text("用户1234", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = OnSurface, modifier = Modifier.padding(bottom = 4.dp))
-                Text("标准版用户", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = OnSurfaceVariant)
-            }
-        }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(24.dp))
 
         // 使用统计卡片
         val stats = com.jun3120.acremote.data.usage.UsageTracker.getStats(context)
