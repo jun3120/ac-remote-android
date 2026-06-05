@@ -1,5 +1,6 @@
 package com.jun3120.acremote.ui.compose
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
@@ -32,6 +33,17 @@ fun AcRemoteApp() {
 
     // Load saved remotes
     var devices by remember { mutableStateOf(savedRemoteToDeviceUi(RemotePreferences.getSavedRemotes(context))) }
+
+    // 系统返回手势 → 返回上一级，不退出应用
+    BackHandler(enabled = view != ViewState.Devices) {
+        view = when (view) {
+            ViewState.SelectBrand -> ViewState.Devices
+            ViewState.TestRemote -> ViewState.SelectBrand
+            ViewState.AcControl -> ViewState.Devices
+            ViewState.Profile -> ViewState.Devices
+            else -> ViewState.Devices
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (view) {
