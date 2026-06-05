@@ -83,10 +83,16 @@ fun DeviceListScreen(
             Text("共 ${devices.size} 个连接的遥控器", fontSize = 14.sp, color = OnSurfaceVariant, modifier = Modifier.padding(top = 4.dp, bottom = 24.dp))
 
             if (devices.isNotEmpty()) {
-                LazyVerticalGrid(columns = GridCells.Fixed(2), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.fillMaxWidth().height(360.dp)) {
-                    items(devices) { device -> DeviceCard(device) { onSelect(device.name) } }
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth().weight(1f, fill = true),
+                ) {
+                    items(devices) { device ->
+                        DeviceCard(device, onClick = { onSelect(device.name) })
+                    }
                 }
-                Spacer(Modifier.height(32.dp))
             } else {
                 Box(modifier = Modifier.fillMaxWidth().padding(vertical = 56.dp), contentAlignment = Alignment.Center) {
                     Text("暂无设备，点击添加开始配对", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = OnSurfaceVariant)
@@ -103,14 +109,23 @@ fun DeviceListScreen(
 @Composable
 private fun DeviceCard(device: DeviceUi, onClick: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(16.dp)).clip(RoundedCornerShape(16.dp)).background(SurfaceLowest).clickable(onClick = onClick).padding(24.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(150.dp)
+            .shadow(2.dp, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(SurfaceLowest)
+            .clickable(onClick = onClick)
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
-        Box(modifier = Modifier.size(56.dp).clip(CircleShape).background(device.iconBackground), contentAlignment = Alignment.Center) {
-            Icon(device.icon, null, tint = device.iconTint, modifier = Modifier.size(28.dp))
+        Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(device.iconBackground), contentAlignment = Alignment.Center) {
+            Icon(device.icon, null, tint = device.iconTint, modifier = Modifier.size(24.dp))
         }
-        Spacer(Modifier.height(16.dp))
-        Text(device.name, fontWeight = FontWeight.SemiBold, color = OnSurface, modifier = Modifier.padding(bottom = 4.dp))
+        Spacer(Modifier.height(12.dp))
+        Text(device.name, fontWeight = FontWeight.SemiBold, color = OnSurface, maxLines = 1, fontSize = 14.sp)
+        Spacer(Modifier.height(6.dp))
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(if (device.offline) Outline else Primary))
             Text(device.status, fontSize = 12.sp, color = OnSurfaceVariant)

@@ -25,8 +25,6 @@ object RemotePreferences {
 
     fun addRemote(context: Context, remote: SavedRemote) {
         val remotes = getSavedRemotes(context).toMutableList()
-        // 避免重复：同路径覆盖
-        remotes.removeAll { it.codePath == remote.codePath }
         remotes.add(0, remote)
         save(context, remotes)
     }
