@@ -3,6 +3,7 @@ package com.jun3120.acremote.ui.compose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -27,6 +28,7 @@ fun AcRemoteApp() {
     var currentCategoryId by remember { mutableIntStateOf(1) }
     var currentSubCategory by remember { mutableIntStateOf(0) }
     var currentDeviceName by remember { mutableStateOf("未命名空调") }
+    var pairingKey by remember { mutableIntStateOf(0) }
     var defaultSaveName by remember { mutableStateOf("") }
 
     // Load saved remotes
@@ -36,7 +38,7 @@ fun AcRemoteApp() {
         when (view) {
             ViewState.Devices -> DeviceListScreen(
                 devices = devices,
-                onAdd = { view = ViewState.SelectBrand },
+                onAdd = { pairingKey++; view = ViewState.SelectBrand },
                 onSelect = { name ->
                     val saved = RemotePreferences.getSavedRemotes(context)
                     val found = saved.find { it.brandName == name }
@@ -44,7 +46,7 @@ fun AcRemoteApp() {
                         currentCodePath = found.codePath
                         currentCategoryId = found.categoryId
                         currentSubCategory = found.subCategory
-                        currentDeviceName = found.brandName
+                        currentDeviceName = found.displayName
                         view = ViewState.AcControl
                     }
                 },
@@ -70,7 +72,10 @@ fun AcRemoteApp() {
                     }.start()
                 },
             )
-            ViewState.TestRemote -> TestRemoteScreen(
+            ViewState.TestRemote -> {
+                // key ensures fresh PairingViewModel each pairing session
+                key(view.toString() + pairingKey.toString()) {
+                    TestRemoteScreen(
                 brand = selectedBrand,
                 categoryId = selectedCategoryId,
                 indexesJson = selectedIndexesJson,
@@ -85,6 +90,8 @@ fun AcRemoteApp() {
                     showSaveModal = true
                 },
             )
+                }
+            }
             ViewState.AcControl -> AcControlScreen(
                 onBack = { view = ViewState.Devices },
                 codePath = currentCodePath,
@@ -95,6 +102,7 @@ fun AcRemoteApp() {
                 onCloseModal = { showSaveModal = false },
                 onSaveDevice = { name ->
                     currentDeviceName = name
+                    RemotePreferences.updateName(context, currentCodePath, name)
                     devices = savedRemoteToDeviceUi(RemotePreferences.getSavedRemotes(context))
                 },
                 defaultSaveName = defaultSaveName,

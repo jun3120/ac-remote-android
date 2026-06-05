@@ -55,7 +55,7 @@ private val iconOptions = listOf(
 fun savedRemoteToDeviceUi(remotes: List<SavedRemote>): List<DeviceUi> {
     return remotes.mapIndexed { idx, r ->
         val iconChoice = iconOptions[idx % iconOptions.size]
-        DeviceUi(name = r.brandName, status = "已连接", icon = iconChoice.icon, iconBackground = iconChoice.iconBackground, iconTint = iconChoice.iconTint)
+        DeviceUi(name = r.displayName, status = "已连接", icon = iconChoice.icon, iconBackground = iconChoice.iconBackground, iconTint = iconChoice.iconTint)
     }
 }
 

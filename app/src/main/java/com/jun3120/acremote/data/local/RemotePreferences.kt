@@ -36,6 +36,13 @@ object RemotePreferences {
         save(context, remotes)
     }
 
+    fun updateName(context: Context, codePath: String, customName: String) {
+        val remotes = getSavedRemotes(context).map {
+            if (it.codePath == codePath) it.copy(customName = customName) else it
+        }
+        save(context, remotes)
+    }
+
     private fun save(context: Context, remotes: List<SavedRemote>) {
         getPrefs(context).edit()
             .putString(KEY_REMOTES, gson.toJson(remotes))
@@ -51,5 +58,8 @@ data class SavedRemote(
     val categoryId: Int,
     val subCategory: Int,
     val brandName: String,
+    val customName: String = "",
     val savedAt: Long = System.currentTimeMillis()
-)
+) {
+    val displayName: String get() = customName.ifEmpty { brandName }
+}
