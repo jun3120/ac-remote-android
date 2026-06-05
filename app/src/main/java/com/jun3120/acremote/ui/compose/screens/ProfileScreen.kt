@@ -65,7 +65,7 @@ fun ProfileScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
         Spacer(Modifier.height(16.dp))
 
         // 使用统计卡片
-        val stats = remember { com.jun3120.acremote.data.usage.UsageTracker.getStats(context) }
+        val stats = com.jun3120.acremote.data.usage.UsageTracker.getStats(context)
         if (stats.totalActions > 0) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 16.dp)

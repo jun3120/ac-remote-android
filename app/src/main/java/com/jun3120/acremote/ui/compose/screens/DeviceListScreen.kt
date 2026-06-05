@@ -101,7 +101,7 @@ fun DeviceListScreen(
 
             // 节能建议卡片
             val ctx = LocalContext.current
-            val stats = remember { UsageTracker.getStats(ctx) }
+            val stats = UsageTracker.getStats(ctx)
             if (stats.totalActions > 0) {
                 val tip = getEnergyTip(stats)
                 Spacer(Modifier.height(16.dp))
