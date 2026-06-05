@@ -158,11 +158,16 @@ private fun CircleControlButton(onClick: () -> Unit, enabled: Boolean, content: 
 
 @Composable
 private fun SecondaryControlCard(label: String, icon: ImageVector, value: String, enabled: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.shadow(2.dp, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp)).background(SurfaceLowest).clickable(enabled = enabled, onClick = onClick).padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Outline, modifier = Modifier.padding(bottom = 12.dp))
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(icon, null, tint = Primary, modifier = Modifier.size(24.dp))
-            Text(value, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Primary)
+    Column(
+        modifier = modifier.shadow(2.dp, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp))
+            .background(SurfaceLowest).clickable(enabled = enabled, onClick = onClick)
+            .padding(vertical = 20.dp, horizontal = 12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(label, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Outline, modifier = Modifier.padding(bottom = 10.dp))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(icon, null, tint = Primary, modifier = Modifier.size(20.dp))
+            Text(value, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Primary, softWrap = false)
         }
     }
 }
