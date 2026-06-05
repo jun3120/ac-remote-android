@@ -34,12 +34,12 @@ import coil.compose.AsyncImage
 import com.jun3120.acremote.App
 import com.jun3120.acremote.ui.compose.theme.*
 
-private data class BrandItem(val name: String, val en: String)
+private data class BrandItem(val name: String, val en: String, val id: Int)
 
 @Composable
 fun SelectBrandScreen(
     onBack: () -> Unit,
-    onSelect: (String) -> Unit,
+    onSelect: (String, Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var brands by remember { mutableStateOf<List<BrandItem>>(emptyList()) }
@@ -50,7 +50,7 @@ fun SelectBrandScreen(
         Thread {
             App.instance.webAPIs.listBrands(1, 0, 50, object : net.irext.webapi.WebAPICallbacks.ListBrandsCallback {
                 override fun onListBrandsSuccess(list: List<net.irext.webapi.model.Brand>?) {
-                    brands = list?.map { BrandItem(it.name ?: "未知", "") } ?: emptyList()
+                    brands = list?.map { BrandItem(it.name ?: "未知", "", it.id) } ?: emptyList()
                     loading = false
                 }
                 override fun onListBrandsFailed() { loading = false }
@@ -96,7 +96,7 @@ fun SelectBrandScreen(
                 rows.forEach { row ->
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         row.forEach { brand ->
-                            HotBrandCard(brand, { onSelect(brand.name) }, Modifier.weight(1f))
+                            HotBrandCard(brand, { onSelect(brand.name, brand.id) }, Modifier.weight(1f))
                         }
                         if (row.size == 1) Spacer(Modifier.weight(1f))
                     }

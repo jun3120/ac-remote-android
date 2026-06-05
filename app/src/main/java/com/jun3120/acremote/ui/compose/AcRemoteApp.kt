@@ -51,13 +51,13 @@ fun AcRemoteApp() {
             )
             ViewState.SelectBrand -> SelectBrandScreen(
                 onBack = { view = ViewState.Devices },
-                onSelect = { brand ->
+                onSelect = { brand, brandId ->
                     selectedBrand = brand
                     // Load indexes for this brand
                     selectedCategoryId = 1 // AC
                     Thread {
                         com.jun3120.acremote.App.instance.webAPIs.listRemoteIndexes(
-                            1, 0, "", "", 0,
+                            1, brandId, "", "", 0,
                             object : net.irext.webapi.WebAPICallbacks.ListIndexesCallback {
                 @Suppress("UNCHECKED_CAST")
                                 override fun onListIndexesSuccess(list: List<net.irext.webapi.model.RemoteIndex>?) {
