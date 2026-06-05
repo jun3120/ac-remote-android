@@ -40,7 +40,7 @@ fun AcRemoteApp() {
                 onAdd = { pairingKey++; view = ViewState.SelectBrand },
                 onSelect = { name ->
                     val saved = RemotePreferences.getSavedRemotes(context)
-                    val found = saved.find { it.brandName == name }
+                    val found = saved.find { it.displayName == name }
                     if (found != null) {
                         currentCodePath = found.codePath
                         currentCategoryId = found.categoryId
