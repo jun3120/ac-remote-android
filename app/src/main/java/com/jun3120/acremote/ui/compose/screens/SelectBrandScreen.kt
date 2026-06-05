@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.PhoneAndroid
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
@@ -44,6 +43,11 @@ fun SelectBrandScreen(
 ) {
     var brands by remember { mutableStateOf<List<BrandItem>>(emptyList()) }
     var loading by remember { mutableStateOf(true) }
+    var searchText by remember { mutableStateOf("") }
+    val filtered = remember(brands, searchText) {
+        if (searchText.isBlank()) brands
+        else brands.filter { it.name.contains(searchText, ignoreCase = true) || it.en.contains(searchText, ignoreCase = true) }
+    }
 
     LaunchedEffect(Unit) {
         // Load brands from IRext API
@@ -63,7 +67,7 @@ fun SelectBrandScreen(
         Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回", tint = Primary) }
             Text("选择空调品牌", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = OnSurface)
-            IconButton(onClick = {}) { Icon(Icons.Outlined.MoreVert, "更多", tint = OnSurfaceVariant) }
+            Spacer(Modifier.size(48.dp))
         }
         Spacer(Modifier.height(32.dp))
 
@@ -78,8 +82,8 @@ fun SelectBrandScreen(
         Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).clip(RoundedCornerShape(12.dp)).background(SurfaceLow).padding(horizontal = 16.dp, vertical = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Outlined.Search, null, tint = Outline, modifier = Modifier.size(20.dp))
-                BasicTextField(value = "", onValueChange = {}, textStyle = TextStyle(fontSize = 14.sp, color = OnSurface), cursorBrush = SolidColor(Primary), modifier = Modifier.fillMaxWidth().padding(start = 12.dp),
-                    decorationBox = { inner -> Box { Text("搜索品牌...", color = Outline, fontSize = 14.sp); inner() } })
+                BasicTextField(value = searchText, onValueChange = { searchText = it }, textStyle = TextStyle(fontSize = 14.sp, color = OnSurface), cursorBrush = SolidColor(Primary), modifier = Modifier.fillMaxWidth().padding(start = 12.dp),
+                    decorationBox = { inner -> Box { if (searchText.isEmpty()) Text("搜索品牌...", color = Outline, fontSize = 14.sp); inner() } })
             }
         }
         Spacer(Modifier.height(24.dp))
@@ -92,7 +96,7 @@ fun SelectBrandScreen(
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                 Text("热门品牌", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = OnSurface, modifier = Modifier.padding(bottom = 16.dp))
 
-                val rows = brands.chunked(2)
+                val rows = filtered.chunked(2)
                 rows.forEach { row ->
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         row.forEach { brand ->
