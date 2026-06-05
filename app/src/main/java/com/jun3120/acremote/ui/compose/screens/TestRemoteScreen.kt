@@ -35,6 +35,7 @@ fun TestRemoteScreen(
     modifier: Modifier = Modifier,
 ) {
     val vm: PairingViewModel = viewModel(key = "pairing_$pairingKey")
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     LaunchedEffect(Unit) {
         val type = object : com.google.gson.reflect.TypeToken<List<net.irext.webapi.model.RemoteIndex>>() {}.type
@@ -66,12 +67,11 @@ fun TestRemoteScreen(
 
         Column(modifier = Modifier.fillMaxWidth().weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(if (currentName.isEmpty()) "方案 1 / ?"  else currentName, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Outline, letterSpacing = 2.sp, modifier = Modifier.padding(bottom = 6.dp))
                 Text("正在匹配您的空调", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = OnSurface)
             }
             Spacer(Modifier.height(64.dp))
 
-            Box(modifier = Modifier.size(224.dp).shadow(24.dp, CircleShape, spotColor = Primary.copy(alpha = 0.3f)).clip(CircleShape).background(Primary).clickable { vm.testPower() }, contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.size(224.dp).shadow(24.dp, CircleShape, spotColor = Primary.copy(alpha = 0.3f)).clip(CircleShape).background(Primary).clickable { vibrate(context); vm.testPower() }, contentAlignment = Alignment.Center) {
                 if (state == PairingViewModel.State.DOWNLOADING || state == PairingViewModel.State.RETRYING)
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(48.dp))
                 else
@@ -87,14 +87,18 @@ fun TestRemoteScreen(
 
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(SurfaceLow).clickable { vm.skipCurrent() }.padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(SurfaceLow).clickable { vibrate(context); vm.skipCurrent() }.padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
                     Text("否", fontWeight = FontWeight.Bold, color = OnSurfaceVariant)
                 }
-                Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(Primary).clickable { vm.confirmMatch() }.padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).background(Primary).clickable { vibrate(context); vm.confirmMatch() }.padding(vertical = 16.dp), contentAlignment = Alignment.Center) {
                     Text("是", fontWeight = FontWeight.Bold, color = Color.White)
                 }
             }
-            Text("手动输入型号", fontSize = 14.sp, color = Outline, fontWeight = FontWeight.Medium, modifier = Modifier.fillMaxWidth().padding(top = 24.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
         }
     }
+}
+
+private fun vibrate(context: android.content.Context) {
+    val v = context.getSystemService(android.content.Context.VIBRATOR_SERVICE) as? android.os.Vibrator
+    v?.vibrate(android.os.VibrationEffect.createOneShot(80, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
 }
