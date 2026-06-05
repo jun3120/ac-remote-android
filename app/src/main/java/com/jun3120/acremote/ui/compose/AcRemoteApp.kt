@@ -107,9 +107,7 @@ fun AcRemoteApp() {
                 },
                 defaultSaveName = defaultSaveName,
             )
-            ViewState.Profile -> ProfileScreen(
-                onBack = { view = ViewState.Devices },
-            )
+            ViewState.Profile -> ProfileScreen()
         }
 
         if (view == ViewState.Devices || view == ViewState.Profile) {

@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 private data class ProfileMenuItem(val icon: ImageVector, val label: String, val onClick: () -> Unit)
 
 @Composable
-fun ProfileScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
+fun ProfileScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val menuItems = listOf(
         ProfileMenuItem(Icons.AutoMirrored.Outlined.Chat, "意见反馈") { Toast.makeText(context, "即将上线", Toast.LENGTH_SHORT).show() },
@@ -39,10 +39,8 @@ fun ProfileScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
     )
 
     Column(modifier = modifier.fillMaxSize().background(Surface).padding(top = 40.dp, bottom = 96.dp)) {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "返回", tint = Primary) }
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
             Text("我的", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = OnSurface)
-            Spacer(Modifier.size(48.dp))
         }
         Spacer(Modifier.height(24.dp))
 
