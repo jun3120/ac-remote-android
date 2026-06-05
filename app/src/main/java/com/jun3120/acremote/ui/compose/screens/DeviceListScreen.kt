@@ -70,7 +70,7 @@ fun DeviceListScreen(
     modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxSize().background(Surface)) {
-        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp).padding(top = 40.dp, bottom = 96.dp)) {
+        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp).padding(top = 40.dp, bottom = 128.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Icon(Icons.Outlined.PhoneAndroid, null, tint = Primary, modifier = Modifier.size(24.dp))
@@ -116,7 +116,7 @@ fun DeviceListScreen(
             }
         }
         FloatingActionButton(
-            onClick = onAdd, modifier = Modifier.align(Alignment.BottomEnd).padding(end = 24.dp, bottom = 96.dp).size(56.dp).shadow(8.dp, CircleShape, spotColor = Primary.copy(alpha = 0.3f)),
+            onClick = onAdd, modifier = Modifier.align(Alignment.BottomEnd).padding(end = 24.dp, bottom = 84.dp).size(56.dp).shadow(8.dp, CircleShape, spotColor = Primary.copy(alpha = 0.3f)),
             containerColor = Primary, contentColor = Color.White, shape = CircleShape,
         ) { Icon(Icons.Filled.Add, "添加设备", modifier = Modifier.size(32.dp)) }
     }
