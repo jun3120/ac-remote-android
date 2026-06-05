@@ -4,8 +4,9 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.jun3120.acremote.App
 import com.jun3120.acremote.data.ir.IrTransmitter
+import com.jun3120.acremote.App
+import com.jun3120.acremote.data.usage.UsageTracker
 import net.irext.decode.sdk.IRDecode
 import net.irext.decode.sdk.bean.ACStatus
 import net.irext.decode.sdk.utils.Constants
@@ -37,6 +38,7 @@ class RemoteViewModel : ViewModel() {
     val toast: LiveData<String?> = _toast
 
     private var initialized = false
+    private var devicePath = ""
 
     fun init(codePath: String, categoryId: Int, subCategory: Int, brandName: String) {
         if (initialized) return
@@ -53,6 +55,7 @@ class RemoteViewModel : ViewModel() {
             Log.d(TAG, "temp range: ${tr.tempMin + 16} ~ ${tr.tempMax + 16}")
         } catch (_: Exception) {}
 
+        devicePath = codePath
         initialized = true
         Log.d(TAG, "init success")
     }
@@ -71,6 +74,7 @@ class RemoteViewModel : ViewModel() {
 
         if (send(KEY_POWER)) {
             _powerOn.value = acPower == Constants.ACPower.POWER_ON.value
+            UsageTracker.log(App.instance, devicePath, "power", if (_powerOn.value == true) "on" else "off")
         } else {
             // 失败回退
             acPower = if (acPower == Constants.ACPower.POWER_ON.value)
@@ -85,6 +89,7 @@ class RemoteViewModel : ViewModel() {
         acTemp += 1
         if (send(KEY_TEMP_UP)) {
             _temperature.value = acTemp + 16
+            UsageTracker.log(App.instance, devicePath, "temp_up", "${acTemp + 16}")
         } else {
             acTemp -= 1  // 失败回退
         }
@@ -94,17 +99,26 @@ class RemoteViewModel : ViewModel() {
         acTemp -= 1
         if (send(KEY_TEMP_DN)) {
             _temperature.value = acTemp + 16
+            UsageTracker.log(App.instance, devicePath, "temp_down", "${acTemp + 16}")
         } else {
             acTemp += 1
         }
     }
 
     fun cycleMode() {
-        if (send(KEY_MODE)) _mode.value = ((_mode.value ?: 0) + 1) % 5
+        if (send(KEY_MODE)) {
+            val newVal = ((_mode.value ?: 0) + 1) % 5
+            _mode.value = newVal
+            UsageTracker.log(App.instance, devicePath, "mode", modeDisplayName(newVal))
+        }
     }
 
     fun cycleWindSpeed() {
-        if (send(KEY_WIND_SPD)) _fanSpeed.value = ((_fanSpeed.value ?: 0) + 1) % 4
+        if (send(KEY_WIND_SPD)) {
+            val newVal = ((_fanSpeed.value ?: 0) + 1) % 4
+            _fanSpeed.value = newVal
+            UsageTracker.log(App.instance, devicePath, "fan", fanDisplayName(newVal).replace("风速", ""))
+        }
     }
 
     fun toggleSwing() {
@@ -120,6 +134,7 @@ class RemoteViewModel : ViewModel() {
         )
         if (send(KEY_SWING, status)) {
             _swing.value = !(_swing.value ?: false)
+            UsageTracker.log(App.instance, devicePath, "swing", if (_swing.value == true) "on" else "off")
         }
     }
 

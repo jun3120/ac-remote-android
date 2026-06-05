@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,7 +62,35 @@ fun ProfileScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
                 Text("标准版用户", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = OnSurfaceVariant)
             }
         }
-        Spacer(Modifier.height(40.dp))
+        Spacer(Modifier.height(16.dp))
+
+        // 使用统计卡片
+        val stats = remember { com.jun3120.acremote.data.usage.UsageTracker.getStats(context) }
+        if (stats.totalActions > 0) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 16.dp)
+                    .shadow(2.dp, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp))
+                    .background(SurfaceLowest).padding(20.dp)
+            ) {
+                Text("使用统计", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = OnSurface, modifier = Modifier.padding(bottom = 12.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("${stats.favoriteTemp}°C", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Primary)
+                        Text("偏好温度", fontSize = 12.sp, color = OnSurfaceVariant)
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(stats.favoriteMode, fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Primary)
+                        Text("常用模式", fontSize = 12.sp, color = OnSurfaceVariant)
+                    }
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(formatMinutes(stats.totalRuntimeMinutes), fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Primary)
+                        Text("累计运行", fontSize = 12.sp, color = OnSurfaceVariant)
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
 
         Column(modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 24.dp)) {
             Column(modifier = Modifier.fillMaxWidth().shadow(2.dp, RoundedCornerShape(24.dp)).clip(RoundedCornerShape(24.dp)).background(SurfaceLowest).padding(vertical = 8.dp)) {
@@ -80,4 +109,11 @@ fun ProfileScreen(onBack: () -> Unit, modifier: Modifier = Modifier) {
 
         Text("版本号 v1.0.0", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Outline, modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
+}
+
+private fun formatMinutes(minutes: Long): String {
+    if (minutes < 60) return "${minutes}m"
+    val hours = minutes / 60
+    val mins = minutes % 60
+    return if (mins == 0L) "${hours}h" else "${hours}h${mins}m"
 }

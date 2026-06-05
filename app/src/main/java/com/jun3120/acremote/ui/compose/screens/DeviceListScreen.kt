@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -28,6 +29,10 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import com.jun3120.acremote.data.usage.UsageStats
+import com.jun3120.acremote.data.usage.UsageTracker
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -93,6 +98,22 @@ fun DeviceListScreen(
                     Text("暂无设备，点击添加开始配对", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = OnSurfaceVariant)
                 }
             }
+
+            // 节能建议卡片
+            val ctx = LocalContext.current
+            val stats = remember { UsageTracker.getStats(ctx) }
+            if (stats.totalActions > 0) {
+                val tip = getEnergyTip(stats)
+                Spacer(Modifier.height(16.dp))
+                Column(modifier = Modifier.fillMaxWidth().background(PrimaryContainer, RoundedCornerShape(16.dp)).padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("💡", fontSize = 18.sp); Spacer(Modifier.width(8.dp))
+                        Text("节能建议", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = OnPrimaryContainer)
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Text(tip, fontSize = 13.sp, color = OnPrimaryContainer.copy(alpha = 0.8f), lineHeight = 20.sp)
+                }
+            }
         }
         FloatingActionButton(
             onClick = onAdd, modifier = Modifier.align(Alignment.BottomEnd).padding(end = 24.dp, bottom = 96.dp).size(56.dp).shadow(8.dp, CircleShape, spotColor = Primary.copy(alpha = 0.3f)),
@@ -125,5 +146,15 @@ private fun DeviceCard(device: DeviceUi, onClick: () -> Unit) {
             Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(if (device.offline) Outline else Primary))
             Text(device.status, fontSize = 12.sp, color = OnSurfaceVariant)
         }
+    }
+}
+
+private fun getEnergyTip(stats: UsageStats): String {
+    return when {
+        stats.favoriteTemp > 24 -> "夏季制冷建议设在 26°C，每调高 1°C 可节电约 7%。您当前偏好 ${stats.favoriteTemp}°C。"
+        stats.favoriteTemp < 22 -> "冬季制热建议设在 20°C，每调低 1°C 可节电约 10%。"
+        stats.totalRuntimeMinutes > 480 -> "您今日已运行超过 8 小时，建议定时关闭或开窗通风片刻。"
+        stats.modes.getOrDefault("制冷", 0) > stats.modes.getOrDefault("制热", 0) -> "制冷模式下搭配风扇使用可提升体感降温效果，节省空调能耗。"
+        else -> "出门前记得关空调，使用定时功能可避免忘关造成的能源浪费。"
     }
 }
