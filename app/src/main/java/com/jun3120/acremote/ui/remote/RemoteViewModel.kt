@@ -14,19 +14,14 @@ class RemoteViewModel : ViewModel() {
 
     private val irDecode = IRDecode.getInstance()
 
-    // === 追踪空调真实当前状态 ===
-    private var acPower = Constants.ACPower.POWER_OFF.value     // 1=OFF, 0=ON
-    private var acMode = Constants.ACMode.MODE_COOL.value       // 0=COOL
-    private var acTemp = Constants.ACTemperature.TEMP_24.value  // 8=24°C
+    // 解码库只追踪模式/温度/风速/扫风（电源始终传 ON，实际开关由解码库 apply_function 处理）
+    private var acMode = Constants.ACMode.MODE_COOL.value
+    private var acTemp = Constants.ACTemperature.TEMP_24.value
     private var acWindSpeed = Constants.ACWindSpeed.SPEED_AUTO.value
     private var acWindDir = Constants.ACSwing.SWING_ON.value
-    private var acDisplay = 0
-    private var acSleep = 0
-    private var acTimer = 0
-    private var changeWindDir = 0
 
     // === UI 状态 ===
-    private val _powerOn = MutableLiveData(false)
+    private val _powerOn = MutableLiveData(true)
     val powerOn: LiveData<Boolean> = _powerOn
 
     private val _temperature = MutableLiveData(24)
@@ -54,16 +49,14 @@ class RemoteViewModel : ViewModel() {
         _brandName.value = brandName
 
         val file = java.io.File(codePath)
-        Log.d(TAG, "openFile: $codePath exists=${file.exists()} size=${file.length()} cat=$categoryId sub=$subCategory")
+        Log.d(TAG, "openFile: $codePath exists=${file.exists()} size=${file.length()}")
 
-        irDecode.closeBinary()
         val r = irDecode.openFile(categoryId, subCategory, codePath)
         if (r != 0) { _toast.value = "红外码库加载失败 (err=$r)"; return }
 
-        // 查询此码库支持的功能范围
         try {
             val tr = irDecode.getTemperatureRange(Constants.ACMode.MODE_COOL.value)
-            Log.d(TAG, "温度范围: ${tr.tempMin + 16} ~ ${tr.tempMax + 16}")
+            Log.d(TAG, "temp range: ${tr.tempMin + 16} ~ ${tr.tempMax + 16}")
         } catch (_: Exception) {}
 
         initialized = true
@@ -71,61 +64,50 @@ class RemoteViewModel : ViewModel() {
     }
 
     // === 操作 ===
+    // 关键设计（基于 ir_ac_control.c 源码）：
+    // 解码器只在 acPower=ON 时运行全部 apply 函数（mode/temp/wind/swing）。
+    // acPower=OFF 时只运行 apply_power，其余跳过 → 红外编码为空。
+    // 因此所有操作都传 acPower=POWER_ON，电源切换由 apply_function(SWITCH_POWER) 完成。
 
     fun togglePower() {
-        // 传入当前真实 power 状态，解码库据此判断切换方向
-        val status = currentStatus()
-        if (send(Constants.ACFunction.FUNCTION_SWITCH_POWER.value, status)) {
-            // 解码库内部已切换，同步本地状态
-            acPower = if (acPower == Constants.ACPower.POWER_OFF.value)
-                Constants.ACPower.POWER_ON.value
-            else
-                Constants.ACPower.POWER_OFF.value
-            _powerOn.value = acPower == Constants.ACPower.POWER_ON.value
+        // 始终传 POWER_ON，解码库 apply_function 处理电源切换
+        if (send(Constants.ACFunction.FUNCTION_SWITCH_POWER.value)) {
+            _powerOn.value = !(_powerOn.value ?: false)
         }
     }
 
     fun tempUp() {
-        val status = currentStatus()
-        Log.d(TAG, "tempUp: current temp=$acTemp (${acTemp + 16}°C)")
-        if (send(Constants.ACFunction.FUNCTION_TEMPERATURE_UP.value, status)) {
+        if (send(Constants.ACFunction.FUNCTION_TEMPERATURE_UP.value)) {
             acTemp += 1
             _temperature.value = acTemp + 16
         }
     }
 
     fun tempDown() {
-        val status = currentStatus()
-        Log.d(TAG, "tempDown: current temp=$acTemp (${acTemp + 16}°C)")
-        if (send(Constants.ACFunction.FUNCTION_TEMPERATURE_DOWN.value, status)) {
+        if (send(Constants.ACFunction.FUNCTION_TEMPERATURE_DOWN.value)) {
             acTemp -= 1
             _temperature.value = acTemp + 16
         }
     }
 
     fun cycleMode() {
-        val status = currentStatus()
-        if (send(Constants.ACFunction.FUNCTION_CHANGE_MODE.value, status)) {
+        if (send(Constants.ACFunction.FUNCTION_CHANGE_MODE.value)) {
             acMode = (acMode + 1) % 5
             _mode.value = acMode
         }
     }
 
     fun cycleWindSpeed() {
-        val status = currentStatus()
-        if (send(Constants.ACFunction.FUNCTION_SWITCH_WIND_SPEED.value, status)) {
+        if (send(Constants.ACFunction.FUNCTION_SWITCH_WIND_SPEED.value)) {
             acWindSpeed = (acWindSpeed + 1) % 4
             _fanSpeed.value = acWindSpeed
         }
     }
 
     fun toggleSwing() {
-        val status = currentStatus()
-        if (send(Constants.ACFunction.FUNCTION_SWITCH_SWING.value, status)) {
+        if (send(Constants.ACFunction.FUNCTION_SWITCH_SWING.value)) {
             acWindDir = if (acWindDir == Constants.ACSwing.SWING_ON.value)
-                Constants.ACSwing.SWING_OFF.value
-            else
-                Constants.ACSwing.SWING_ON.value
+                Constants.ACSwing.SWING_OFF.value else Constants.ACSwing.SWING_ON.value
             _swing.value = acWindDir == Constants.ACSwing.SWING_ON.value
         }
     }
@@ -151,17 +133,27 @@ class RemoteViewModel : ViewModel() {
 
     // === 内部 ===
 
-    /** 构造反映当前真实状态的 ACStatus */
+    /** 构造 ACStatus — acPower 始终为 ON，确保解码库运行全部 apply 函数 */
     private fun currentStatus(): ACStatus {
-        return ACStatus(acPower, acMode, acTemp, acWindSpeed, acWindDir,
-            acDisplay, acSleep, acTimer, changeWindDir)
+        return ACStatus(
+            Constants.ACPower.POWER_ON.value,  // always ON
+            acMode,
+            acTemp,
+            acWindSpeed,
+            acWindDir,
+            0,  // display
+            0,  // sleep
+            0,  // timer
+            0   // changeWindDir
+        )
     }
 
-    private fun send(functionCode: Int, acStatus: ACStatus): Boolean {
+    private fun send(functionCode: Int): Boolean {
         if (!initialized) { _toast.value = "未初始化"; return false }
 
-        val pattern = irDecode.decodeBinary(functionCode, acStatus)
-        Log.d(TAG, "send func=$functionCode power=${acStatus.acPower} mode=${acStatus.acMode} temp=${acStatus.acTemp} -> patternLen=${pattern.size}")
+        val status = currentStatus()
+        val pattern = irDecode.decodeBinary(functionCode, status)
+        Log.d(TAG, "send func=$functionCode mode=${status.acMode} temp=${status.acTemp} -> patternLen=${pattern.size}")
 
         if (pattern.isEmpty()) {
             _toast.value = "红外编码为空 (func=$functionCode)"
