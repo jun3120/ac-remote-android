@@ -108,19 +108,18 @@ class RemoteViewModel : ViewModel() {
     }
 
     fun toggleSwing() {
-        // acWindDir 直接作为输出值，先设定目标再发送
-        acWindDir = if (acWindDir == Constants.ACSwing.SWING_ON.value)
-            Constants.ACSwing.SWING_OFF.value
-        else
-            Constants.ACSwing.SWING_ON.value
-
-        if (send(KEY_SWING)) {
-            _swing.value = acWindDir == Constants.ACSwing.SWING_ON.value
-        } else {
-            acWindDir = if (acWindDir == Constants.ACSwing.SWING_ON.value)
-                Constants.ACSwing.SWING_OFF.value
-            else
-                Constants.ACSwing.SWING_ON.value
+        // changeWindDir=1 触发扫风切换，acWindDir 保持固定基准
+        val status = ACStatus(
+            acPower,
+            Constants.ACMode.MODE_COOL.value,
+            acTemp,
+            Constants.ACWindSpeed.SPEED_AUTO.value,
+            Constants.ACSwing.SWING_ON.value,
+            0, 0, 0,
+            1  // changeWindDir=1 → 切换扫风
+        )
+        if (send(KEY_SWING, status)) {
+            _swing.value = !(_swing.value ?: false)
         }
     }
 
@@ -163,10 +162,8 @@ class RemoteViewModel : ViewModel() {
         )
     }
 
-    private fun send(keyCode: Int): Boolean {
+    private fun send(keyCode: Int, status: ACStatus = currentStatus()): Boolean {
         if (!initialized) { _toast.value = "未初始化"; return false }
-
-        val status = currentStatus()
         val pattern = irDecode.decodeBinary(keyCode, status)
         Log.d(TAG, "send key=$keyCode -> patternLen=${pattern.size}")
 
