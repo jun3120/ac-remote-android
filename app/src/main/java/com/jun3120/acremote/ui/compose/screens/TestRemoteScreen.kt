@@ -45,9 +45,10 @@ fun TestRemoteScreen(
     val currentName by vm.currentName.observeAsState("")
     val progressText by vm.progressText.observeAsState("")
 
-    LaunchedEffect(vm.pairResult) {
-        val r = vm.pairResult.value
-        if (r != null) onSuccess(r.codePath, r.subCategory, r.brandName)
+    val pairResult by vm.pairResult.observeAsState()
+
+    LaunchedEffect(pairResult) {
+        pairResult?.let { onSuccess(it.codePath, it.subCategory, it.brandName) }
     }
 
     Column(modifier = modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Surface, TestRemoteGradientEnd))).padding(top = 40.dp, bottom = 48.dp)) {
