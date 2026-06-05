@@ -2,6 +2,9 @@ package com.jun3120.acremote.ui.compose.theme
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 
 @Immutable
@@ -46,7 +49,7 @@ val DarkAppColors = AppColors(
 val LocalAppColors = compositionLocalOf { LightAppColors }
 
 object CurrentColors {
-    var colors: AppColors = LightAppColors
+    var colors: AppColors by mutableStateOf(LightAppColors)
 }
 
 // Top-level getters - all screens use these directly
