@@ -53,6 +53,10 @@ class RemoteViewModel : ViewModel() {
             Log.d(TAG, "temp range: ${tr.tempMin + 16} ~ ${tr.tempMax + 16}")
         } catch (_: Exception) {}
 
+        // 预热：首次 decodeBinary 可能只初始化内部状态，不产生有效编码
+        val warmup = irDecode.decodeBinary(KEY_TEMP_UP, currentStatus())
+        Log.d(TAG, "warmup patternLen=${warmup.size}")
+
         initialized = true
         Log.d(TAG, "init success")
     }
@@ -152,13 +156,13 @@ class RemoteViewModel : ViewModel() {
     companion object {
         private const val TAG = "RemoteViewModel"
 
-        // Native ir_ac_control key_code 映射:
-        //   0→POWER, 1→MODE, 2→TEMP_UP, 3→TEMP_DOWN,
-        //   9→WIND_SPEED, 10→SWING
+        // key_code 映射（根据实测修正）：
+        //   0→POWER, 1→MODE?, 3→TEMP_UP(实测升温), 8→TEMP_DOWN,
+        //   9→WIND_SPEED?, 10→SWING?
         private const val KEY_POWER    = 0
         private const val KEY_MODE     = 1
-        private const val KEY_TEMP_UP  = 2
-        private const val KEY_TEMP_DN  = 3
+        private const val KEY_TEMP_UP  = 3   // 实测：空调升温
+        private const val KEY_TEMP_DN  = 8   // 源码 alt TEMP_DOWN
         private const val KEY_WIND_SPD = 9
         private const val KEY_SWING    = 10
     }
